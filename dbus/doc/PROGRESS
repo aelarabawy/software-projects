@@ -1,0 +1,15 @@
+#This file is to list progress of the DBUS project:
+
+# 1. I put some slides on the G-BUS. This will need to be updated after the project is complete to capture the experiences in the project
+# 2. I started to look into the GLIB API for the GBus, note that there are two APIs. One is the high level and the other is the low level
+     Actully the work is in the libgio and not in libglib
+# 3. Started to work on the High level api, described in https://developer.gnome.org/gio/stable/
+# 4. I faced some issues at the begining with the error about not calling the g_type_init() and I discovered that the current api only works for glib-2.0 versions above 2.36
+     Since I am working with Ubuntu 12.04LTS, which only supports up to version 2.32, I had some issues
+     I tried to resolve these issues by downloading and building glib-2.0 version 2.40 but since it is not supported by ubuntu, I was afraid in running into issues 
+     So I decided to move to Ubuntu 14.04LTS which supports the glib-2.0 version 2.40
+     $ sudo apt-get install glib-2.0
+     Later, I should make adjustments to my program to handle versions before that
+     One concern I have is that raspbian (for the raspberry Pi only supports up to 2.32 as well) so either, I will need to upgrade it, or make my program support the old versions
+     This is a future task TODO
+
