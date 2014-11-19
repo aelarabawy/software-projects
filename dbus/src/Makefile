@@ -5,8 +5,8 @@
 #######################################
 
 # ToolChain
-RPI_TOOLS_DIR=/usr/bin
-CC=$(RPI_TOOLS_DIR)/gcc -std=gnu99
+TOOL_CHAIN_DIR=/usr/bin
+CC=$(TOOL_CHAIN_DIR)/gcc -std=gnu99
 
 # Binary Name
 BIN_NAME=intro-dbus
@@ -14,15 +14,14 @@ BIN_NAME=intro-dbus
 # Include Directory
 INCLUDE_DIR=../include
 ## Add any more include folders here
-CFLAGS=-I$(INCLUDE_DIR) -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include 
+CFLAGS=-I$(INCLUDE_DIR) -I/usr/include/glib-2.0 -I/usr/lib//x86_64-linux-gnu/glib-2.0/include 
 
 SRC_DIR=../src
 LIB_DIR=../lib
 BIN_DIR=../bin
 
 OBJ_DIR=../build
-#LIBS= -lgio-2.0
-LIBS= -l:libgio-2.0.so.0.4000.0 -l:libglib-2.0.so.0.4000.0 -l:libgobject-2.0.so.0.4000.0
+LIBS= -lgio-2.0 -lglib-2.0
 DEP=
 
 # No Customization below this line
