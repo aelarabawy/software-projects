@@ -21,7 +21,7 @@ LIB_DIR=../lib
 BIN_DIR=../bin
 
 OBJ_DIR=../build
-LIBS= -lgio-2.0 -lglib-2.0
+LIBS= -lgio-2.0 -lglib-2.0 -lgobject-2.0
 DEP=
 
 # No Customization below this line

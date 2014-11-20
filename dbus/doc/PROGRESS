@@ -12,4 +12,7 @@
      Later, I should make adjustments to my program to handle versions before that
      One concern I have is that raspbian (for the raspberry Pi only supports up to 2.32 as well) so either, I will need to upgrade it, or make my program support the old versions
      This is a future task TODO
-
+# 5. Note that there is a lot of good examples in the glib folder to how to use the library
+     To learn about owning names or watching name check the file :
+     To learn about building a Object manager server check the file: gdbus_example_objectmanager-servr.c
+# 6. Keep in mind that if you try to run the program from an ssh session, it will not succeed. It has to use ssh -X for the application to be able to connect to the dbus
