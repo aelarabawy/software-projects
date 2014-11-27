@@ -12,15 +12,15 @@ CC=$(TOOL_CHAIN_DIR)/gcc -std=gnu99
 BIN_NAME=intro-dbus
 
 # Include Directory
-INCLUDE_DIR=../include
+INCLUDE_DIR=../../include
 ## Add any more include folders here
 CFLAGS=-I$(INCLUDE_DIR) -I/usr/include/glib-2.0 -I/usr/lib//x86_64-linux-gnu/glib-2.0/include 
 
-SRC_DIR=../src
-LIB_DIR=../lib
-BIN_DIR=../bin
+SRC_DIR=../intro-dbus
+LIB_DIR=../../lib
+BIN_DIR=../../bin
 
-OBJ_DIR=../build
+OBJ_DIR=../../build
 LIBS= -lgio-2.0 -lglib-2.0 -lgobject-2.0
 DEP=
 
@@ -40,7 +40,7 @@ $(OBJ_DIR)/%.o: %.c $(DEP)
 
 .PHONY: clean
 clean:
-	rm -f $(OBJ_DIR)/*.o *~ core $(INCLUDE_DIR)/*~
+	rm -f $(OBJ_DIR)/*.o *~ core $(INCLUDE_DIR)/*~ $(BIN_DIR)/$(BIN_NAME)
 
 
 .PHONY: install
