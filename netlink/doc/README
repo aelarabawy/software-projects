@@ -1,0 +1,16 @@
+#This is a readme file for the D-BUS project
+
+#Target for this project is to do the following:
+## 1. Learn about the D-Bus and its terminology
+## 2. Learn about the different wrappers GLib, QT, Python
+## 3. Use this knowledge to interface to hostapd, and wpa_supplicant 
+
+#Steps taken:
+## 1. Read a few documents about the D-Bus, and prepare a Lecture slides on the topic
+## 2. Build a Client/server application that communicate via the D-Bus
+### 2.a. Using GLib High Level API
+### 2.b. Using GLib Low Level API
+### 2.c. Using QT API
+### 2.d. Using Python Bindings
+## 3. Build a user plane application to interface to wpa_suplicant (TODO Put details on what it should be doing)
+## 4. Build a user plane application to interface to hostapd (TODO... Put details on what it should be doing)
