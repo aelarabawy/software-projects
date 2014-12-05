@@ -99,11 +99,11 @@ void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIn
 }
 
 
-void wpa_supplicantClient_proxyIntrospectable_Cleanup(wpa_supplicantClient_ProxyIntrospectable *proxy) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Cleanup() \n");
+void wpa_supplicantClient_proxyIntrospectable_Destroy(wpa_supplicantClient_ProxyIntrospectable *proxy) {
+	printf("Entering wpa_supplicantClient_proxyIntrospectable_Destroy() \n");
 
 	if (!proxy) {
-		printf("NULL is passed to wpa_supplicantClient_proxyIntrospectable_Cleanup() ... Exiting \n");
+		printf("NULL is passed to wpa_supplicantClient_proxyIntrospectable_Destroy() ... Exiting \n");
 		return;
 	}
 

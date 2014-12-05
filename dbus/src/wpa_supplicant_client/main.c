@@ -26,7 +26,7 @@ int main (int argc, char* argv[]) {
 	//Perform needed Cleanup
 	//The program enters here before it exits
 	wpa_supplicantClient_Stop(client);
-	wpa_supplicantClient_Cleanup (client);
+	wpa_supplicantClient_Destroy (client);
 
 	return 0;
 }

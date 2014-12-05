@@ -26,6 +26,6 @@ wpa_supplicantClient_nameWatcher * wpa_supplicantClient_nameWatcher_Init (char *
 																		  void * parent);
 void wpa_supplicantClient_nameWatcher_Start (wpa_supplicantClient_nameWatcher *);
 void wpa_supplicantClient_nameWatcher_Stop (wpa_supplicantClient_nameWatcher *);
-void wpa_supplicantClient_nameWatcher_Cleanup (wpa_supplicantClient_nameWatcher *);
+void wpa_supplicantClient_nameWatcher_Destroy (wpa_supplicantClient_nameWatcher *);
 
 #endif /* WPA_SUPPLICANT_CLIENT_NAME_WATCHER_H_ */

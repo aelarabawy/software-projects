@@ -112,11 +112,11 @@ void wpa_supplicantClient_nameWatcher_Stop (wpa_supplicantClient_nameWatcher *na
 	return;
 }
 
-void wpa_supplicantClient_nameWatcher_Cleanup (wpa_supplicantClient_nameWatcher *nameWatcher) {
-	printf ("Entering wpa_supplicantClient_nameWatcher_Cleanup()\n");
+void wpa_supplicantClient_nameWatcher_Destroy (wpa_supplicantClient_nameWatcher *nameWatcher) {
+	printf ("Entering wpa_supplicantClient_nameWatcher_Destroy()\n");
 
 	if (!nameWatcher){
-		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Cleanup ... Doing nothing \n");
+		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Destroy ... Doing nothing \n");
 		return;
 	}
 

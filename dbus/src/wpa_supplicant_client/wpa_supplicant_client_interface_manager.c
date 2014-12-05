@@ -45,6 +45,9 @@ void wpa_supplicantClient_ifManager_Destroy (wpa_supplicantClient_ifManager *man
 		return;
 	}
 
+	//Finally free the object
+	free(manager);
+
 	return;
 }
 

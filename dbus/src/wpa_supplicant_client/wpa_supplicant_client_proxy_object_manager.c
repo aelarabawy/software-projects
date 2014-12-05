@@ -218,11 +218,11 @@ void wpa_supplicantClient_proxyObjectManager_Stop (wpa_supplicantClient_ProxyObj
 	return;
 }
 
-void wpa_supplicantClient_proxyObjectManager_Cleanup(wpa_supplicantClient_ProxyObjectManager *manager) {
-	printf("Entering wpa_supplicantClient_ProxyObjectManager_Cleanup() \n");
+void wpa_supplicantClient_proxyObjectManager_Destroy(wpa_supplicantClient_ProxyObjectManager *manager) {
+	printf("Entering wpa_supplicantClient_ProxyObjectManager_Destroy() \n");
 
 	if (!manager) {
-		printf("NULL is passed to wpa_supplicantClient_ProxyObjectManager_Cleanup() ... Exiting \n");
+		printf("NULL is passed to wpa_supplicantClient_ProxyObjectManager_Destroy() ... Exiting \n");
 		return;
 	}
 

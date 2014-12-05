@@ -21,7 +21,7 @@ typedef struct wpa_supplicantClient_ProxyObjectManager {
 wpa_supplicantClient_ProxyObjectManager * wpa_supplicantClient_proxyObjectManager_Init ();
 void wpa_supplicantClient_proxyObjectManager_Start (wpa_supplicantClient_ProxyObjectManager *);
 void wpa_supplicantClient_proxyObjectManager_Stop (wpa_supplicantClient_ProxyObjectManager *);
-void wpa_supplicantClient_proxyObjectManager_Cleanup(wpa_supplicantClient_ProxyObjectManager *);
+void wpa_supplicantClient_proxyObjectManager_Destroy(wpa_supplicantClient_ProxyObjectManager *);
 
 void wpa_supplicantClient_proxyObjectManager_StartFollowing(wpa_supplicantClient_ProxyObjectManager *,
 		                                                    GDBusConnection *);
