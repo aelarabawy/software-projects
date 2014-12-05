@@ -17,4 +17,6 @@
 #define SYNC_API 1
 #define BUS_NAME_MAX_LEN 100
 
+#define bool unsigned char
+
 #endif /* WPA_SUPPLICANT_CLIENT_COMMON_H_ */

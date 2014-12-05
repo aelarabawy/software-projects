@@ -5,11 +5,13 @@
  *      Author: aelarabawy
  */
 
+#include "wpa_supplicant_client_defines.h"
 #include "wpa_supplicant_client_proxy_object_manager.h"
 
-wpa_supplicantClient_ProxyObjectManager * wpa_supplicantClient_ProxyObjectManager_Init () {
+wpa_supplicantClient_ProxyObjectManager * wpa_supplicantClient_proxyObjectManager_Init () {
+	printf("Entering wpa_supplicantClient_proxyObjectManager_Init() \n");
 	//First Create the object
-	wpa_supplicantClient_ProxyObjectManager * manager = malloc (sizeof(wpa_supplicantClient_ProxyObjectManager));
+	wpa_supplicantClient_ProxyObjectManager * manager = malloc(sizeof(wpa_supplicantClient_ProxyObjectManager));
 	if (!manager){
 		printf ("Can not allocate a wpa_supplicantClient_ProxyObjectManager Object ...Exiting\n");
 		return NULL;
@@ -22,7 +24,7 @@ wpa_supplicantClient_ProxyObjectManager * wpa_supplicantClient_ProxyObjectManage
 void onObjectAdded (GDBusObjectManager *manager,
 		            GDBusObject *object,
 					gpointer userData) {
-	printf("Entering onObjectAdded ....\n");
+	printf("Entering onObjectAdded() ....\n");
 	printf("----- Object Path: %s \n", g_dbus_object_get_object_path(object));
 
 	return;
@@ -31,7 +33,7 @@ void onObjectAdded (GDBusObjectManager *manager,
 void onObjectRemoved (GDBusObjectManager *manager,
 		              GDBusObject *object,
 					  gpointer userData) {
-	printf("Entering onObjectRemoved ....\n");
+	printf("Entering onObjectRemoved() ....\n");
 	printf("----- Object Path: %s \n", g_dbus_object_get_object_path(object));
 
 	return;
@@ -49,26 +51,81 @@ void onInterfaceRemoved (GDBusObject *object,
 	printf ("Entering the onInterfaceRemoved()\n");
 }
 
-void wpa_supplicantClient_ProxyObjectManager_Start (wpa_supplicantClient_ProxyObjectManager *manager,
-		                                            GDBusConnection *connection) {
-	printf("Entering wpa_supplicantClient_ProxyObjectManager_Start \n");
+void wpa_supplicantClient_proxyObjectManager_Start (wpa_supplicantClient_ProxyObjectManager *manager) {
+	printf("Entering wpa_supplicantClient_ProxyObjectManager_Start() \n");
 
 	if (!manager) {
 		printf("NULL is passed to the function wpa_supplicantClient_ProxyObjectManager_Start() \n");
 		return;
 	}
 
-	GDBusObjectProxy *object = g_dbus_object_proxy_new (connection,
-			                                           "/fi/w1/wpa_supplicant1");
-	if (!object){
-		printf ("Failed to create an object proxy for /fi/w1/wpa_supplicant1 \n");
+	return;
+}
+
+
+
+
+void wpa_supplicantClient_proxyObjectManager_StartFollowing(wpa_supplicantClient_ProxyObjectManager *manager,
+		                                                    GDBusConnection *connection) {
+	GError * error = NULL;
+
+	manager->mainObject = g_dbus_object_proxy_new (connection,
+			                                       WPA_SUPPLICANT_MAIN_OBJECT_PATH);
+	if (!manager->mainObject){
+		printf ("Failed to create an object proxy for the main object \n");
 		return;
 	}
 
-	const gchar *objectPath =  g_dbus_object_get_object_path(G_DBUS_OBJECT(object));
+	manager->mainInterfaceProxy = g_dbus_proxy_new_sync (connection,
+			                                             G_DBUS_PROXY_FLAGS_NONE,
+								  						 NULL,
+														 WPA_SUPPLICANT_BUS_NAME,
+														 WPA_SUPPLICANT_MAIN_OBJECT_PATH,
+														 WPA_SUPPLICANT_MAIN_INTERFACE,
+														 NULL,
+														 &error);
+	if (!manager->mainInterfaceProxy){
+		printf("Can not create an interface proxy for the main interface \n");
+		printf("Error Message: %s \n", error->message);
+	} else {
+		printf("Created the proxy for the main interface successfully \n");
+	}
+
+	manager->interfaceInterfaceProxy = g_dbus_proxy_new_sync (connection,
+			                                                  G_DBUS_PROXY_FLAGS_NONE,
+								  						      NULL,
+														      WPA_SUPPLICANT_BUS_NAME,
+														      WPA_SUPPLICANT_MAIN_OBJECT_PATH,
+														      WPA_SUPPLICANT_INTERFACE_INTERFACE,
+														      NULL,
+														      &error);
+	if (!manager->interfaceInterfaceProxy){
+		printf("Can not create an interface proxy for the Interface interface \n");
+		printf("Error Message: %s \n", error->message);
+	} else {
+		printf("Created the proxy for the Interface interface successfully \n");
+	}
+
+
+    g_signal_connect (G_DBUS_OBJECT(manager->mainObject),
+    			      "interface-added",
+    				   G_CALLBACK(onInterfaceAdded),
+    				   NULL);
+
+    g_signal_connect (G_DBUS_OBJECT(manager->mainObject),
+    			      "interface-removed",
+    				   G_CALLBACK(onInterfaceRemoved),
+    				   NULL);
+
+
+
+#if 0
+	//DEAD Code
+	const gchar *objectPath =  g_dbus_object_get_object_path(G_DBUS_OBJECT(manager->mainObject));
 	printf("The Object path is %s \n",objectPath);
 
-    GList *interfaceList = g_dbus_object_get_interfaces(G_DBUS_OBJECT(object));
+
+    GList *interfaceList = g_dbus_object_get_interfaces(G_DBUS_OBJECT(manager->mainObject));
     if (!interfaceList){
     	printf ("The Object has no Interfaces\n");
     } else {
@@ -79,19 +136,7 @@ void wpa_supplicantClient_ProxyObjectManager_Start (wpa_supplicantClient_ProxyOb
         }
     }
 
-    g_signal_connect (G_DBUS_OBJECT(object),
-    			      "interface-added",
-    				   G_CALLBACK(onInterfaceAdded),
-    				   NULL);
 
-    g_signal_connect (G_DBUS_OBJECT(object),
-    			      "interface-removed",
-    				   G_CALLBACK(onInterfaceRemoved),
-    				   NULL);
-
-
-	GError * error = NULL;
-#if 0
 	manager->m_objectManager =
 			g_dbus_object_manager_client_new_sync (connection,
 												   G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
@@ -154,27 +199,16 @@ void wpa_supplicantClient_ProxyObjectManager_Start (wpa_supplicantClient_ProxyOb
 					  NULL);
 					  */
 #endif
-	GDBusProxy *interfaceProxy = g_dbus_proxy_new_sync (connection,
-			                                            G_DBUS_PROXY_FLAGS_NONE,
-														NULL,
-														"fi.w1.wpa_supplicant1",
-														"/fi/w1/wpa_supplicant1",
-														"fi.w1.wpa_supplicant1",
-														NULL,
-														&error);
-	if (!interfaceProxy){
-		printf("Can not create an interface proxy \n");
-		printf("Error Message: %s \n", error->message);
-	} else {
-		printf("Created the interface successfully \n");
-	}
 
+    return;
+}
 
+void wpa_supplicantClient_proxyObjectManager_StopFollowing(wpa_supplicantClient_ProxyObjectManager *manager) {
 	return;
 }
 
-void wpa_supplicantClient_ProxyObjectManager_Stop (wpa_supplicantClient_ProxyObjectManager *manager){
-	printf("Entering wpa_supplicantClient_ProxyObjectManager_Start \n");
+void wpa_supplicantClient_proxyObjectManager_Stop (wpa_supplicantClient_ProxyObjectManager *manager){
+	printf("Entering wpa_supplicantClient_ProxyObjectManager_Stop() \n");
 
 	if (!manager) {
 		printf("NULL is passed to the function wpa_supplicantClient_ProxyObjectManager_Start() \n");
@@ -184,8 +218,8 @@ void wpa_supplicantClient_ProxyObjectManager_Stop (wpa_supplicantClient_ProxyObj
 	return;
 }
 
-void wpa_supplicantClient_ProxyObjectManager_Cleanup(wpa_supplicantClient_ProxyObjectManager *manager) {
-	printf("Entering wpa_supplicantClient_ProxyObjectManager_Cleanup \n");
+void wpa_supplicantClient_proxyObjectManager_Cleanup(wpa_supplicantClient_ProxyObjectManager *manager) {
+	printf("Entering wpa_supplicantClient_ProxyObjectManager_Cleanup() \n");
 
 	if (!manager) {
 		printf("NULL is passed to wpa_supplicantClient_ProxyObjectManager_Cleanup() ... Exiting \n");

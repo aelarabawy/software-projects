@@ -22,7 +22,17 @@ LIBS= -lgio-2.0 -lglib-2.0 -lgobject-2.0
 DEP=
 
 BIN_NAME=wpa_supplicant_client
-SRC= main.c wpa_supplicant_client.c wpa_supplicant_client_name_watcher.c wpa_supplicant_client_proxy_object_manager.c
+SRC= main.c  \
+     wpa_supplicant_client.c \
+     wpa_supplicant_client_name_watcher.c \
+     wpa_supplicant_client_proxy_object_manager.c \
+     wpa_supplicant_client_proxy_introspectable.c \
+     wpa_supplicant_client_interface_manager.c \
+     wpa_supplicant_client_interface.c \
+     wpa_supplicant_client_network.c \
+     wpa_supplicant_client_bss_manager.c \
+     wpa_supplicant_client_bss.c \
+     wpa_supplicant_client_bss_dbus_controller.c \
 
 
 # No Customization below this line

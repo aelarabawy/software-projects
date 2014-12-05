@@ -15,11 +15,14 @@ typedef struct {
 } wpa_supplicantClient_ProxyIntrospectable;
 
 //Methods
-wpa_supplicantClient_ProxyIntrospectable *wpa_supplicantClient_proxyIntrospectable_init();
-void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyIntrospectable *,
-		                                            GDBusConnection *);
+wpa_supplicantClient_ProxyIntrospectable *wpa_supplicantClient_proxyIntrospectable_Init();
+void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyIntrospectable *);
 void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIntrospectable *);
 void wpa_supplicantClient_proxyIntrospectable_Cleanup(wpa_supplicantClient_ProxyIntrospectable *);
+
+void wpa_supplicantClient_proxyIntrospectable_GetXmlDescription(wpa_supplicantClient_ProxyIntrospectable *,
+			                                                    char **,
+																GDBusConnection *);
 
 
 #endif /* WPA_SUPPLICANT_CLIENT_PROXY_INTROSPECTABLE_H_ */

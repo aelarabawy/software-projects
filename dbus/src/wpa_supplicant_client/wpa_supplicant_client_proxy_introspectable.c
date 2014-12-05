@@ -5,38 +5,47 @@
  *      Author: aelarabawy
  */
 
+#include "wpa_supplicant_client_defines.h"
 #include "wpa_supplicant_client_proxy_introspectable.h"
 
-wpa_supplicantClient_ProxyIntrospectable *wpa_supplicantClient_proxyIntrospectable_init() {
+wpa_supplicantClient_ProxyIntrospectable *wpa_supplicantClient_proxyIntrospectable_Init() {
+	printf("Entering wpa_supplicantClient_proxyIntrospectable_Init() \n");
+
 	//First Create the object
-	wpa_supplicantClient_ProxyIntrospectable * proxy = malloc (sizeof(wpa_supplicantClient_ProxyObjectManager));
+	wpa_supplicantClient_ProxyIntrospectable *proxy = malloc (sizeof(wpa_supplicantClient_ProxyIntrospectable));
 	if (!proxy){
-		printf ("Can not allocate a wpa_supplicantClient_ProxyObjectManager Object ...Exiting\n");
+		printf ("Can not allocate a wpa_supplicantClient_ProxyIntrospectable Object ...Exiting\n");
 		return NULL;
 	}
-	memset(proxy, 0, sizeof(wpa_supplicantClient_ProxyObjectManager));
+	memset(proxy, 0, sizeof(wpa_supplicantClient_ProxyIntrospectable));
 
 	return proxy;
 }
 
 
-void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyIntrospectable *proxy,
-		                                             GDBusConnection *connection) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Start \n");
+void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyIntrospectable *proxy) {
+	printf("Entering wpa_supplicantClient_proxyIntrospectable_Start() \n");
 
 	if (!proxy) {
 		printf("NULL is passed to the function wpa_supplicantClient_proxyIntrospectable_Start() \n");
 		return;
 	}
 
+	return;
+}
+
+void wpa_supplicantClient_proxyIntrospectable_GetXmlDescription(wpa_supplicantClient_ProxyIntrospectable *proxy,
+			                                                    char **descPtr,
+																GDBusConnection *connection) {
 	GError * error = NULL;
+
 #if SYNC_API
 	proxy->m_introspectionProxy = g_dbus_proxy_new_sync (connection,
 			                                             G_DBUS_PROXY_FLAGS_NONE,
 														 NULL,
-														 "fi.w1.wpa_supplicant1",
-														 "/fi/w1/wpa_supplicant1",
-														 "org.freedesktop.DBus.Introspectable",
+														 WPA_SUPPLICANT_BUS_NAME,
+														 WPA_SUPPLICANT_MAIN_OBJECT_PATH,
+														 WPA_SUPPLICANT_INTROSPECTABLE_INTERFACE,
 														 NULL,
 														 &error);
 	if (!proxy->m_introspectionProxy){
@@ -48,7 +57,7 @@ void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyI
 	}
 
 
-    GVariant *v = g_dbus_proxy_call_sync (introspectionProxy,
+    GVariant *v = g_dbus_proxy_call_sync (proxy->m_introspectionProxy,
     		                              "Introspect",
 				 					      NULL,
 										  G_DBUS_CALL_FLAGS_NONE,
@@ -62,18 +71,24 @@ void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyI
 	} else {
 		printf("Performed the Introspection Successfully \n");
 	}
+#endif
 
-    gchar * xmlData = NULL;
-   	g_variant_get (v, "(s)", &xmlData);
-   	printf ("Result is : \n %s \n", xmlData);
+   	if (*descPtr) {
+   		free (*descPtr); //TODO this should be changed to gfree.... check with the api
+   		*descPtr = NULL;
+   	}
 
+	g_variant_get(v, "(s)", descPtr);
+	if (!descPtr){
+		printf("Failed to allocate the string for XML Description\n");
+		return;
+	}
 
 	return;
 }
 
-
 void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIntrospectable *proxy) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Stop \n");
+	printf("Entering wpa_supplicantClient_proxyIntrospectable_Stop() \n");
 
 	if (!proxy) {
 		printf("NULL is passed to the function wpa_supplicantClient_proxyIntrospectable_Stop() \n");
@@ -85,7 +100,7 @@ void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIn
 
 
 void wpa_supplicantClient_proxyIntrospectable_Cleanup(wpa_supplicantClient_ProxyIntrospectable *proxy) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Cleanup \n");
+	printf("Entering wpa_supplicantClient_proxyIntrospectable_Cleanup() \n");
 
 	if (!proxy) {
 		printf("NULL is passed to wpa_supplicantClient_proxyIntrospectable_Cleanup() ... Exiting \n");

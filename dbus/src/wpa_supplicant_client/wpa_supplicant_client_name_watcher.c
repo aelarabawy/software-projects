@@ -12,7 +12,7 @@ static void wpa_supplicant_nameWatcher_OnNameUp (GDBusConnection *connection,
 		                                         const gchar * busName,
 		 		   		                         const gchar * nameOwner,
 						                         gpointer userData) {
-	printf ("Entering wpa_supplicant_nameWatcher_OnNameUp function\n");
+	printf ("Entering wpa_supplicant_nameWatcher_OnNameUp()\n");
     printf ("----- BusName = %s \n", busName);
 	printf ("----- Owner Unique Name = %s \n", nameOwner);
 	printf ("----- Connection = %p \n", connection);
@@ -35,7 +35,7 @@ static void wpa_supplicant_nameWatcher_OnNameUp (GDBusConnection *connection,
 static void wpa_supplicant_nameWatcher_OnNameDown (GDBusConnection *connection,
 		                                           const gchar * busName,
 				       	  	                       gpointer userData) {
-	printf ("Entering wpa_supplicant_nameWatcher_OnNameDown function\n");
+	printf ("Entering wpa_supplicant_nameWatcher_OnNameDown()\n");
     printf ("----- BusName = %s \n", busName);
 	printf ("----- Connection = %p \n", connection);
 
@@ -59,7 +59,7 @@ wpa_supplicantClient_nameWatcher * wpa_supplicantClient_nameWatcher_Init (char* 
 		                                                                  void (*onNameUp) (void*, GDBusConnection *),
 																		  void (*onNameDown) (void*,GDBusConnection *),
 																		  void *parent) {
-	printf ("Entering wpa_supplicantClient_nameWatcher_Init, busName = %s\n", busName);
+	printf ("Entering wpa_supplicantClient_nameWatcher_Init(), busName = %s\n", busName);
 
 	//Create the Name Watcher Object
 	wpa_supplicantClient_nameWatcher * nameWatcher = malloc(sizeof(wpa_supplicantClient_nameWatcher));
@@ -78,7 +78,7 @@ wpa_supplicantClient_nameWatcher * wpa_supplicantClient_nameWatcher_Init (char* 
 }
 
 void wpa_supplicantClient_nameWatcher_Start (wpa_supplicantClient_nameWatcher *nameWatcher) {
-
+	printf ("Entering wpa_supplicantClient_nameWatcher_Start()\n");
 	if (!nameWatcher){
 		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Start ... Doing nothing \n");
 		return;
@@ -98,7 +98,7 @@ void wpa_supplicantClient_nameWatcher_Start (wpa_supplicantClient_nameWatcher *n
 }
 
 void wpa_supplicantClient_nameWatcher_Stop (wpa_supplicantClient_nameWatcher *nameWatcher) {
-
+	printf ("Entering wpa_supplicantClient_nameWatcher_Stop()\n");
 	if (!nameWatcher){
 		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Stop ... Doing nothing \n");
 		return;
@@ -113,6 +113,8 @@ void wpa_supplicantClient_nameWatcher_Stop (wpa_supplicantClient_nameWatcher *na
 }
 
 void wpa_supplicantClient_nameWatcher_Cleanup (wpa_supplicantClient_nameWatcher *nameWatcher) {
+	printf ("Entering wpa_supplicantClient_nameWatcher_Cleanup()\n");
+
 	if (!nameWatcher){
 		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Cleanup ... Doing nothing \n");
 		return;
