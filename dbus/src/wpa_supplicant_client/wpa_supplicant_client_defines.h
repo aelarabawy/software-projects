@@ -16,7 +16,7 @@
 
 //Interfaces
 #define WPA_SUPPLICANT_MAIN_INTERFACE      "fi.w1.wpa_supplicant1"
-#define WPA_SUPPLICANT_INTERFACE_INTERFACE "fi.w1.wpa_supplicant1_Interface"
+#define WPA_SUPPLICANT_INTERFACE_INTERFACE "fi.w1.wpa_supplicant1.Interface"
 #define WPA_SUPPLICANT_INTROSPECTABLE_INTERFACE    "org.freedesktop.DBus.Introspectable"
 
 #endif /* WPA_SUPPLICANT_CLIENT_DEFINES_H_ */

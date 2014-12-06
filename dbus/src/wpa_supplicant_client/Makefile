@@ -26,7 +26,7 @@ SRC= main.c  \
      wpa_supplicant_client.c \
      wpa_supplicant_client_dbus_controller.c \
      wpa_supplicant_client_name_watcher.c \
-     wpa_supplicant_client_proxy_object_manager.c \
+     wpa_supplicant_client_proxy_object.c \
      wpa_supplicant_client_proxy_introspectable.c \
      wpa_supplicant_client_interface_manager.c \
      wpa_supplicant_client_interface.c \

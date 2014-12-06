@@ -7,6 +7,8 @@
 
 #include "wpa_supplicant_client.h"
 
+//Prototype for the call back function from the D-Bus Controller
+void dbusControllerNotify (void *, ClientEventType, void*);
 
 /**
  * wpa_supplicantClient_Init()
@@ -24,8 +26,12 @@ wpa_supplicantClient *wpa_supplicantClient_Init() {
 	}
 	memset (client, 0, sizeof(wpa_supplicantClient));
 
+	//Setting the state
+	client->m_state = CLIENT_STATE_IDLE;
+
 	//Initialize the D-Bus Controller
-	client->m_dbusController = wpa_supplicantClient_dbusController_Init();
+	client->m_dbusController = wpa_supplicantClient_dbusController_Init(dbusControllerNotify,
+			                                                            (void *)client);
 	if (!client->m_dbusController) {
 		printf("Failed to initialize the Client D-BUS Controller ... exiting\n");
 
@@ -114,4 +120,81 @@ void wpa_supplicantClient_Destroy (wpa_supplicantClient *client) {
 	return;
 }
 
+
+/**
+ * Public Get/Set methods
+ * */
+ClientDbgLvl getDbgLvl (wpa_supplicantClient *client) {
+	return client->m_dbgLvl;
+}
+
+void setDbgLvl(wpa_supplicantClient *client, ClientDbgLvl lvl) {
+	client->m_dbgLvl = lvl;
+}
+
+bool getDbgShowTS (wpa_supplicantClient *client) {
+	return client->m_dbgShowTS;
+}
+
+void setDbgShowTS (wpa_supplicantClient *client, bool show) {
+	client->m_dbgShowTS = show;
+}
+
+bool getDbgShowKeys (wpa_supplicantClient *client) {
+	return client->m_dbgShowKeys;
+}
+
+void setDbgShowKeys (wpa_supplicantClient *client, bool show) {
+	client->m_dbgShowKeys = show;
+}
+
+#if 0
+int getEapMethodCount (wpa_supplicantClient *client) {
+	return client->m_eapMethodCount;
+}
+
+char ** getDEapMethods (wpa_supplicantClient *client) {
+	return client->m_eapMethods;
+}
+#endif
+
+
+/**
+ * Private methods
+ */
+//Notification function (call back from dbus controller)
+void dbusControllerNotify (void *parent, ClientEventType type, void* args) {
+
+	wpa_supplicantClient *client = (wpa_supplicantClient *)parent;
+
+	switch (type) {
+	case CLIENT_EVENT_TYPE_READY:
+		client->m_state = CLIENT_STATE_READY;
+		break;
+
+	case CLIENT_EVENT_TYPE_ADD_IF:
+		break;
+
+	case CLIENT_EVENT_TYPE_DEL_IF:
+		break;
+
+	case CLIENT_EVENT_TYPE_SET_DBG_LEVEL:
+		client->m_dbgLvl = (ClientDbgLvl)args;
+		break;
+
+	case CLIENT_EVENT_TYPE_SET_SHOW_TS:
+		client->m_dbgShowTS = (bool)args;
+		break;
+
+	case CLIENT_EVENT_TYPE_SET_SHOW_KEYS:
+		client->m_dbgShowKeys = (bool)args;
+		break;
+
+	default:
+		printf("Invalid Client Event Type %d\n", type);
+		break;
+	}
+
+	return;
+}
 

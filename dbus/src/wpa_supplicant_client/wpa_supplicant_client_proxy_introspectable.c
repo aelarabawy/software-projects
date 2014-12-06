@@ -31,6 +31,7 @@ void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyI
 		return;
 	}
 
+	//Currently the start function does not do anything ... it is left for future use
 	return;
 }
 
@@ -94,6 +95,7 @@ void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIn
 		printf("NULL is passed to the function wpa_supplicantClient_proxyIntrospectable_Stop() \n");
 		return;
 	}
+
 
 	return;
 }
