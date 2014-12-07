@@ -148,15 +148,20 @@ void setDbgShowKeys (wpa_supplicantClient *client, bool show) {
 	client->m_dbgShowKeys = show;
 }
 
-#if 0
+
 int getEapMethodCount (wpa_supplicantClient *client) {
 	return client->m_eapMethodCount;
 }
 
-char ** getDEapMethods (wpa_supplicantClient *client) {
-	return client->m_eapMethods;
+EapMethod getDEapMethod (wpa_supplicantClient *client, int index) {
+	if (index >= client->m_eapMethodCount) {
+		printf("Invalid Index ... exiting");
+		return EAP_NONE;
+	}
+	else {
+		return client->m_eapMethods[index];
+	}
 }
-#endif
 
 
 /**
@@ -164,6 +169,7 @@ char ** getDEapMethods (wpa_supplicantClient *client) {
  */
 //Notification function (call back from dbus controller)
 void dbusControllerNotify (void *parent, ClientEventType type, void* args) {
+    printf("Entered the dbusControllerNotify() Call back function with type = %d and value %d\n", type, (int)args);
 
 	wpa_supplicantClient *client = (wpa_supplicantClient *)parent;
 
@@ -173,13 +179,24 @@ void dbusControllerNotify (void *parent, ClientEventType type, void* args) {
 		break;
 
 	case CLIENT_EVENT_TYPE_ADD_IF:
+		{
+			char *interface = (char *)args;
+			printf("Client: Adding Interface with Object Path %s\n", interface);
+			wpa_supplicantClient_ifManager_AddIf(client->m_ifManager, interface);
+		}
 		break;
 
-	case CLIENT_EVENT_TYPE_DEL_IF:
+	case CLIENT_EVENT_TYPE_REM_IF:
+		{
+			char *interface = (char *)args;
+			printf("Client: Removing Interface with Object Path %s\n", interface);
+			wpa_supplicantClient_ifManager_RemIf(client->m_ifManager, interface);
+		}
 		break;
 
 	case CLIENT_EVENT_TYPE_SET_DBG_LEVEL:
 		client->m_dbgLvl = (ClientDbgLvl)args;
+
 		break;
 
 	case CLIENT_EVENT_TYPE_SET_SHOW_TS:
@@ -188,6 +205,10 @@ void dbusControllerNotify (void *parent, ClientEventType type, void* args) {
 
 	case CLIENT_EVENT_TYPE_SET_SHOW_KEYS:
 		client->m_dbgShowKeys = (bool)args;
+		break;
+
+	case CLIENT_EVENT_TYPE_ADD_EAP_METHOD:
+		client->m_eapMethods[client->m_eapMethodCount++] = (EapMethod)args;
 		break;
 
 	default:

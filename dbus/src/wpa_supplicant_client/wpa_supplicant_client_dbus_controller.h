@@ -14,17 +14,6 @@
 #include "wpa_supplicant_client_proxy_introspectable.h"
 #include "wpa_supplicant_client_proxy_object.h"
 
-typedef enum {
-	CLIENT_EVENT_TYPE_READY = 0,
-	CLIENT_EVENT_TYPE_ADD_IF,
-	CLIENT_EVENT_TYPE_DEL_IF,
-	CLIENT_EVENT_TYPE_SET_DBG_LEVEL,
-	CLIENT_EVENT_TYPE_SET_SHOW_TS,
-	CLIENT_EVENT_TYPE_SET_SHOW_KEYS,
-	CLIENT_EVENT_TYPE_LAST
-} ClientEventType;
-
-
 typedef struct {
 
 	//Call Back function to the parent

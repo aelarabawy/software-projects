@@ -8,7 +8,7 @@
 #include "wpa_supplicant_client_defines.h"
 #include "wpa_supplicant_client_proxy_object.h"
 
-wpa_supplicantClient_ProxyObject * wpa_supplicantClient_proxyObject_Init () {
+wpa_supplicantClient_ProxyObject * wpa_supplicantClient_proxyObject_Init (void *cb, void *parent) {
 	printf("Entering wpa_supplicantClient_proxyObject_Init() \n");
 	//First Create the object
 	wpa_supplicantClient_ProxyObject * proxy = malloc(sizeof(wpa_supplicantClient_ProxyObject));
@@ -18,20 +18,10 @@ wpa_supplicantClient_ProxyObject * wpa_supplicantClient_proxyObject_Init () {
 	}
 	memset(proxy, 0, sizeof(wpa_supplicantClient_ProxyObject));
 
+	proxy->m_notifyCb = cb;
+	proxy->m_parent = parent;
+
 	return proxy;
-}
-
-
-void onInterfaceAdded (GDBusObject *object,
-		               GDBusInterface *interface,
-					   gpointer userData) {
-	printf ("Entering the onInterfaceAdded()\n");
-}
-
-void onInterfaceRemoved (GDBusObject *object,
-		                 GDBusInterface *interface,
-					     gpointer userData) {
-	printf ("Entering the onInterfaceRemoved()\n");
 }
 
 
@@ -46,7 +36,7 @@ void wpa_supplicantClient_proxyObject_Start (wpa_supplicantClient_ProxyObject *p
 	return;
 }
 
-void signalNotify (GDBusProxy *proxy,
+void signalNotify (GDBusProxy *dbusIfProxy,
 		           gchar *sender,
                    gchar *signal,
                    GVariant *parameter,
@@ -55,10 +45,70 @@ void signalNotify (GDBusProxy *proxy,
 	printf("------ Sender: %s\n", sender);
 	printf("------ Signal: %s\n", signal);
 
+	//First Get the proxy
+	wpa_supplicantClient_ProxyObject *proxy = (wpa_supplicantClient_ProxyObject *)userData;
+
+
 	if (!strcmp(signal,"InterfaceAdded")) {
+	    GVariantIter *iter;
+	    GVariant *v;
+	    gchar *str;
+
 		printf("Received InterfaceAdded Signal\n");
+	    g_variant_get(parameter, "(oa{sv})", &str, &iter);
+
+	    printf("Added Interface : %s\n", str);
+
+	    /*Note that although the parameter includes a dictionary of the interface properties,
+	     * I am not going to parse it here....
+	     * Instead, the interface D-Bus controller will query for it
+	     * */
+
+	    //Call the call back function
+        proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_IF, (void *)str );
+
+#if 0
+	    //Now working with the array of key-value pairs
+
+	    while (g_variant_iter_loop(iter, "{sv}", &str, &v)) {
+	    	printf("Key is : %s\n", str);
+	    }
+
+	    Capabilities
+	    Key is : State
+	    Key is : Scanning
+	    Key is : ApScan
+	    Key is : BSSExpireAge
+	    Key is : BSSExpireCount
+	    Key is : Country
+	    Key is : Ifname
+	    Key is : Driver
+	    Key is : BridgeIfname
+	    Key is : CurrentBSS
+	    Key is : CurrentNetwork
+	    Key is : CurrentAuthMode
+	    Key is : Blobs
+	    Key is : BSSs
+	    Key is : Networks
+	    Key is : FastReauth
+	    Key is : ScanInterval
+	    Key is : PKCS11EnginePath
+	    Key is : PKCS11ModulePath
+	    Key is : DisconnectReason
+
+#endif
+
 	} else if (!strcmp(signal, "InterfaceRemoved")) {
-		printf("Received InterfaceRemoved Signal\n");
+	    gchar *str;
+
+	    printf("Received InterfaceRemoved Signal\n");
+	    g_variant_get(parameter, "(o)", &str);
+
+	    printf("Removed Interface : %s\n", str);
+
+	    //Call the call back function
+        proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_REM_IF, (void *)str );
+
 	} else if (!strcmp(signal, "PropertiesChanged")) {
 		printf("Received PropertiesChanged Signal");
 	} else if (!strcmp(signal, "NetworkRequest")) {
@@ -66,6 +116,152 @@ void signalNotify (GDBusProxy *proxy,
 	} else {
 		printf("Received an Invalid Signal");
 	}
+}
+
+
+void getProp_dbgLvl(wpa_supplicantClient_ProxyObject *proxy) {
+    GVariant *v;
+    ClientDbgLvl dbgLvl;
+    gchar *str;
+
+    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
+  	                                      "DebugLevel");
+    if (!v) {
+    	printf("Failed to get the property for DebugLevel\n");
+    	return;
+    }
+
+    g_variant_get(v, "s",&str);
+    printf("Debug Level Property is %s\n",str);
+
+    if (!strcmp(str, "msgdump")) {
+    	dbgLvl = CLIENT_DBG_LVL_VERBOSE;
+    } else if (!strcmp(str, "debug")) {
+    	dbgLvl = CLIENT_DBG_LVL_DEBUG;
+    } else if (!strcmp(str, "info")) {
+    	dbgLvl = CLIENT_DBG_LVL_INFO;
+    } else if (!strcmp(str, "warning")) {
+    	dbgLvl = CLIENT_DBG_LVL_WRN;
+    } else if (!strcmp(str, "erro")) {
+    	dbgLvl = CLIENT_DBG_LVL_ERR;
+    } else {
+    	printf("Received Invalid Debug Level: %s\n", str);
+    }
+
+    g_free(str);
+
+    //Call the call back function
+    proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_SET_DBG_LEVEL, (void *)dbgLvl );
+}
+
+void getProp_dbgShowTS(wpa_supplicantClient_ProxyObject *proxy) {
+	GVariant *v;
+    bool show;
+
+    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
+	  	                                  "DebugTimestamp");
+    if (!v) {
+    	printf("Failed to get the property for DebugTimestamp\n");
+    	return;
+    }
+
+    g_variant_get(v, "b", &show);
+    printf("DebugTimestamp Property is %d\n",(int)show);
+
+    //Call the call back function
+    proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_SET_SHOW_TS , (void *)show );
+}
+
+void getProp_dbgShowKeys(wpa_supplicantClient_ProxyObject *proxy) {
+	GVariant *v;
+    bool show;
+
+    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
+	  	                                  "DebugShowKeys");
+    if (!v) {
+    	printf("Failed to get the property for DebugShowKeys\n");
+    	return;
+    }
+
+    g_variant_get(v, "b", &show);
+    printf("DebugShowKeys Property is %d\n",(int)show);
+
+    //Call the call back function
+    proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_SET_SHOW_KEYS, (void *)show );
+}
+
+char *eapMethodList[] = {"none", "MD5", "TLS", "MSCHAPV2", "PEAP", "TTLS", "GTC", "OTP", "SIM", "LEAP", "PSK",
+		                 "AKA", "AKA'", "FAST", "PAX", "SAKE", "GPSK", "WSC", "IKEV2", "TNC", "PWD"};
+
+
+void getProp_eapMethods(wpa_supplicantClient_ProxyObject *proxy) {
+    GVariant *v;
+    GVariantIter *iter;
+    gchar *str;
+    EapMethod method;
+
+    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
+  	                                      "EapMethods");
+    if (!v) {
+    	printf("Failed to get the property for EapMethods\n");
+    	return;
+    }
+
+    g_variant_get(v, "as", &iter);
+    while (g_variant_iter_loop(iter, "s", &str)) {
+    	printf("EAP Method : %s\n", str);
+
+    	int i;
+    	for (i = 1; i < (int)EAP_LAST ; i++) {
+    		if (!strcmp(str,eapMethodList[i])) {
+    			method = (EapMethod)i;
+    			break;
+    		}
+    	}
+    	if (i == (int)EAP_LAST) {
+    		printf("Found Invalid EAP Method: %s\n", str);
+    	} else {
+        	//Call the call back function
+            proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_EAP_METHOD, (void *)method );
+    	}
+    }
+}
+
+void getProp_interfaces (wpa_supplicantClient_ProxyObject *proxy) {
+    GVariant *v;
+    GVariantIter *iter;
+    gchar *str;
+
+    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
+  	                                      "Interfaces");
+    if (!v) {
+    	printf("Failed to get the property for Interfaces\n");
+    	return;
+    }
+
+    g_variant_get(v, "ao", &iter);
+    while (g_variant_iter_loop(iter, "o", &str)) {
+    	printf("Interface : %s\n", str);
+
+    	//Call the call back function
+        proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_IF, (void *)str );
+
+#if 0
+    	int i;
+    	for (i = 1; i < (int)EAP_LAST ; i++) {
+    		if (!strcmp(str,eapMethodList[i])) {
+    			method = (EapMethod)i;
+    			break;
+    		}
+    	}
+    	if (i == (int)EAP_LAST) {
+    		printf("Found Invalid EAP Method: %s\n", str);
+    	} else {
+        	//Call the call back function
+            proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_EAP_METHOD, (void *)method );
+    	}
+#endif
+    }
 }
 
 
@@ -115,18 +311,35 @@ void wpa_supplicantClient_proxyObject_StartFollowing (wpa_supplicantClient_Proxy
     g_signal_connect ((proxy->m_mainIfProxy),
     			      "g-signal",
     				   G_CALLBACK(signalNotify),
-    				   NULL);
+    				   (void *)proxy);
 
     //Register for the signals for Interface Interface
     g_signal_connect ((proxy->m_ifIfProxy),
     			      "g-signal",
     				   G_CALLBACK(signalNotify),
-    				   NULL);
+    				   (void *)proxy);
 
     //Next step is to collect property values
+    getProp_dbgLvl(proxy);
+    getProp_dbgShowTS(proxy);
+    getProp_dbgShowKeys(proxy);
+    getProp_eapMethods(proxy);
+    getProp_interfaces(proxy);
 
+    #if 0 //will use some of it later
 
-#if 0 //will use some of it later
+    void onInterfaceAdded (GDBusObject *object,
+    		               GDBusInterface *interface,
+    					   gpointer userData) {
+    	printf ("Entering the onInterfaceAdded()\n");
+    }
+
+    void onInterfaceRemoved (GDBusObject *object,
+    		                 GDBusInterface *interface,
+    					     gpointer userData) {
+    	printf ("Entering the onInterfaceRemoved()\n");
+    }
+
     g_signal_connect (G_DBUS_OBJECT(proxy->m_objectProxy),
     			      "interface-added",
     				   G_CALLBACK(onInterfaceAdded),

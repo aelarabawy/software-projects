@@ -27,13 +27,7 @@ typedef enum {
 	CLIENT_STATE_READY,
 } ClientState;
 
-typedef enum {
-	CLIENT_DBG_LVL_VERBOSE = 0,
-	CLIENT_DBG_LVL_DEBUG,
-	CLIENT_DBG_LVL_INFO,
-	CLIENT_DBG_LVL_WRN,
-	CLIENT_DBG_LVL_ERR
-} ClientDbgLvl;
+#define MAX_EAP_METHODS 100
 
 //Main Structure for the Client
 typedef struct {
@@ -46,10 +40,8 @@ typedef struct {
 	bool m_dbgShowTS; //(RW)
 	bool m_dbgShowKeys; //(RW)
 
-#if 0
 	int m_eapMethodCount; //(RO)
-	char **m_eapMethods;  //(RO)
-#endif
+	EapMethod m_eapMethods [MAX_EAP_METHODS];  //(RO)
 
 } wpa_supplicantClient;
 
@@ -70,10 +62,9 @@ void setDbgShowTS (wpa_supplicantClient *, bool);
 bool getDbgShowKeys (wpa_supplicantClient *);
 void setDbgShowKeys (wpa_supplicantClient *, bool);
 
-#if 0
 int getEapMethodCount (wpa_supplicantClient *);
-char ** getDEapMethods (wpa_supplicantClient *);
-#endif
+EapMethod getDEapMethod (wpa_supplicantClient *, int);
+
 
 
 //Internal Methods

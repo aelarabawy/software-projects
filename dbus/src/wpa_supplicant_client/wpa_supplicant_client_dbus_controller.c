@@ -45,7 +45,7 @@ wpa_supplicantClient_dbusController *wpa_supplicantClient_dbusController_Init (v
 	}
 
 	//Initialize the Object Proxy
-	controller->m_proxyObject = wpa_supplicantClient_proxyObject_Init();
+	controller->m_proxyObject = wpa_supplicantClient_proxyObject_Init(notifyCb, parent);
 	if (!controller->m_proxyObject) {
 		printf("Failed to Initialize the Proxy Object  .. Exiting\n");
 
