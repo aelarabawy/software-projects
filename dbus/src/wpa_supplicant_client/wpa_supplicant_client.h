@@ -20,7 +20,7 @@
 
 #include "common.h"
 #include "wpa_supplicant_client_dbus_controller.h"
-#include "wpa_supplicant_client_interface_manager.h"
+#include "wpa_supplicant_client_if_manager.h"
 
 typedef enum {
 	CLIENT_STATE_IDLE = 0,
@@ -31,45 +31,44 @@ typedef enum {
 
 //Main Structure for the Client
 typedef struct {
+	char m_busName [MAX_LEN_NAME];
+	char m_objectPath [MAX_LEN_NAME];
+
 	wpa_supplicantClient_dbusController *m_dbusController;
 	wpa_supplicantClient_ifManager *m_ifManager;
 
+	//For Internal use
+	ClientState m_state;
+
 	//Properties of the Client
-	ClientState m_state;  //For Internal use
 	ClientDbgLvl m_dbgLvl; //(RW)
 	bool m_dbgShowTS; //(RW)
 	bool m_dbgShowKeys; //(RW)
 
 	int m_eapMethodCount; //(RO)
 	EapMethod m_eapMethods [MAX_EAP_METHODS];  //(RO)
-
 } wpa_supplicantClient;
 
 //Public Methods
 //==============
-wpa_supplicantClient *wpa_supplicantClient_Init ();
+wpa_supplicantClient *wpa_supplicantClient_Init (char *, //Bus Name
+		                                         char *); //Object Path
 void wpa_supplicantClient_Start (wpa_supplicantClient *);
 void wpa_supplicantClient_Stop (wpa_supplicantClient *);
 void wpa_supplicantClient_Destroy (wpa_supplicantClient *);
 
-//Get/Set
-ClientDbgLvl getDbgLvl (wpa_supplicantClient *);
-void setDbgLvl(wpa_supplicantClient *, ClientDbgLvl);
+//Get & Set
+ClientDbgLvl wpa_supplicantClient_GetDbgLvl (wpa_supplicantClient *);
+void wpa_supplicantClient_SetDbgLvl(wpa_supplicantClient *, ClientDbgLvl);
 
-bool getDbgShowTS (wpa_supplicantClient *);
-void setDbgShowTS (wpa_supplicantClient *, bool);
+bool wpa_supplicantClient_GetDbgShowTS (wpa_supplicantClient *);
+void wpa_supplicantClient_SetDbgShowTS (wpa_supplicantClient *, bool);
 
-bool getDbgShowKeys (wpa_supplicantClient *);
-void setDbgShowKeys (wpa_supplicantClient *, bool);
+bool wpa_supplicantClient_GetDbgShowKeys (wpa_supplicantClient *);
+void wpa_supplicantClient_SetDbgShowKeys (wpa_supplicantClient *, bool);
 
-int getEapMethodCount (wpa_supplicantClient *);
-EapMethod getDEapMethod (wpa_supplicantClient *, int);
-
-
-
-//Internal Methods
-//================
-
+int wpa_supplicantClient_GetEapMethodCount (wpa_supplicantClient *);
+EapMethod wpa_supplicantClient_GetDEapMethod (wpa_supplicantClient *, int);
 
 
 #endif /* WPA_SUPPLICANT_CLIENT */

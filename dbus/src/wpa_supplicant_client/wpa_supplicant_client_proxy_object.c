@@ -36,6 +36,56 @@ void wpa_supplicantClient_proxyObject_Start (wpa_supplicantClient_ProxyObject *p
 	return;
 }
 
+void wpa_supplicantClient_proxyObject_SetDbgLvl (wpa_supplicantClient_ProxyObject *proxy, ClientDbgLvl lvl) {
+
+	char dbgLvl [MAX_LEN_NAME];
+
+	switch (lvl) {
+	case CLIENT_DBG_LVL_VERBOSE:
+		strcpy(dbgLvl, "msgdump");
+		break;
+
+	case  CLIENT_DBG_LVL_DEBUG:
+		strcpy(dbgLvl, "debug");
+		break;
+
+	case CLIENT_DBG_LVL_INFO:
+		strcpy(dbgLvl, "info");
+		break;
+
+	case CLIENT_DBG_LVL_WRN:
+		strcpy(dbgLvl, "warning");
+		break;
+
+	case CLIENT_DBG_LVL_ERR:
+		strcpy(dbgLvl, "erro");
+		break;
+    }
+
+	g_dbus_proxy_set_cached_property (proxy->m_mainIfProxy,
+			                          "DebugLevel",
+									  g_variant_new ("s", dbgLvl));
+
+	return;
+}
+
+void wpa_supplicantClient_proxyObject_SetShowTS (wpa_supplicantClient_ProxyObject *proxy, bool show) {
+	g_dbus_proxy_set_cached_property (proxy->m_mainIfProxy,
+			                          "DebugTimestamp",
+								 	  g_variant_new ("b", show));
+
+	return;
+}
+
+void wpa_supplicantClient_proxyObject_SetShowKeys (wpa_supplicantClient_ProxyObject *proxy, bool show) {
+	g_dbus_proxy_set_cached_property (proxy->m_mainIfProxy,
+		 	                          "DebugShowKeys",
+									  g_variant_new ("b", show));
+
+	return;
+}
+
+
 void signalNotify (GDBusProxy *dbusIfProxy,
 		           gchar *sender,
                    gchar *signal,
@@ -119,132 +169,6 @@ void signalNotify (GDBusProxy *dbusIfProxy,
 }
 
 
-void getProp_dbgLvl(wpa_supplicantClient_ProxyObject *proxy) {
-    GVariant *v;
-    ClientDbgLvl dbgLvl;
-    gchar *str;
-
-    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
-  	                                      "DebugLevel");
-    if (!v) {
-    	printf("Failed to get the property for DebugLevel\n");
-    	return;
-    }
-
-    g_variant_get(v, "s",&str);
-    printf("Debug Level Property is %s\n",str);
-
-    if (!strcmp(str, "msgdump")) {
-    	dbgLvl = CLIENT_DBG_LVL_VERBOSE;
-    } else if (!strcmp(str, "debug")) {
-    	dbgLvl = CLIENT_DBG_LVL_DEBUG;
-    } else if (!strcmp(str, "info")) {
-    	dbgLvl = CLIENT_DBG_LVL_INFO;
-    } else if (!strcmp(str, "warning")) {
-    	dbgLvl = CLIENT_DBG_LVL_WRN;
-    } else if (!strcmp(str, "erro")) {
-    	dbgLvl = CLIENT_DBG_LVL_ERR;
-    } else {
-    	printf("Received Invalid Debug Level: %s\n", str);
-    }
-
-    g_free(str);
-
-    //Call the call back function
-    proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_SET_DBG_LEVEL, (void *)dbgLvl );
-}
-
-void getProp_dbgShowTS(wpa_supplicantClient_ProxyObject *proxy) {
-	GVariant *v;
-    bool show;
-
-    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
-	  	                                  "DebugTimestamp");
-    if (!v) {
-    	printf("Failed to get the property for DebugTimestamp\n");
-    	return;
-    }
-
-    g_variant_get(v, "b", &show);
-    printf("DebugTimestamp Property is %d\n",(int)show);
-
-    //Call the call back function
-    proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_SET_SHOW_TS , (void *)show );
-}
-
-void getProp_dbgShowKeys(wpa_supplicantClient_ProxyObject *proxy) {
-	GVariant *v;
-    bool show;
-
-    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
-	  	                                  "DebugShowKeys");
-    if (!v) {
-    	printf("Failed to get the property for DebugShowKeys\n");
-    	return;
-    }
-
-    g_variant_get(v, "b", &show);
-    printf("DebugShowKeys Property is %d\n",(int)show);
-
-    //Call the call back function
-    proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_SET_SHOW_KEYS, (void *)show );
-}
-
-char *eapMethodList[] = {"none", "MD5", "TLS", "MSCHAPV2", "PEAP", "TTLS", "GTC", "OTP", "SIM", "LEAP", "PSK",
-		                 "AKA", "AKA'", "FAST", "PAX", "SAKE", "GPSK", "WSC", "IKEV2", "TNC", "PWD"};
-
-
-void getProp_eapMethods(wpa_supplicantClient_ProxyObject *proxy) {
-    GVariant *v;
-    GVariantIter *iter;
-    gchar *str;
-    EapMethod method;
-
-    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
-  	                                      "EapMethods");
-    if (!v) {
-    	printf("Failed to get the property for EapMethods\n");
-    	return;
-    }
-
-    g_variant_get(v, "as", &iter);
-    while (g_variant_iter_loop(iter, "s", &str)) {
-    	printf("EAP Method : %s\n", str);
-
-    	int i;
-    	for (i = 1; i < (int)EAP_LAST ; i++) {
-    		if (!strcmp(str,eapMethodList[i])) {
-    			method = (EapMethod)i;
-    			break;
-    		}
-    	}
-    	if (i == (int)EAP_LAST) {
-    		printf("Found Invalid EAP Method: %s\n", str);
-    	} else {
-        	//Call the call back function
-            proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_EAP_METHOD, (void *)method );
-    	}
-    }
-}
-
-void getProp_interfaces (wpa_supplicantClient_ProxyObject *proxy) {
-    GVariant *v;
-    GVariantIter *iter;
-    gchar *str;
-
-    v = g_dbus_proxy_get_cached_property (proxy->m_mainIfProxy,
-  	                                      "Interfaces");
-    if (!v) {
-    	printf("Failed to get the property for Interfaces\n");
-    	return;
-    }
-
-    g_variant_get(v, "ao", &iter);
-    while (g_variant_iter_loop(iter, "o", &str)) {
-    	printf("Interface : %s\n", str);
-
-    	//Call the call back function
-        proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_IF, (void *)str );
 
 #if 0
     	int i;
@@ -261,70 +185,8 @@ void getProp_interfaces (wpa_supplicantClient_ProxyObject *proxy) {
             proxy->m_notifyCb(proxy->m_parent, CLIENT_EVENT_TYPE_ADD_EAP_METHOD, (void *)method );
     	}
 #endif
-    }
-}
 
 
-void wpa_supplicantClient_proxyObject_StartFollowing (wpa_supplicantClient_ProxyObject *proxy,
-		                                              GDBusConnection *connection) {
-	GError * error = NULL;
-
-	proxy->m_objectProxy = g_dbus_object_proxy_new (connection,
-			                                        WPA_SUPPLICANT_MAIN_OBJECT_PATH);
-	if (!proxy->m_objectProxy) {
-		printf ("Failed to create an object proxy for the Client \n");
-		return;
-	}
-
-	proxy->m_mainIfProxy = g_dbus_proxy_new_sync (connection,
-			                                      G_DBUS_PROXY_FLAGS_NONE,
-						   						  NULL,
-												  WPA_SUPPLICANT_BUS_NAME,
-												  WPA_SUPPLICANT_MAIN_OBJECT_PATH,
-												  WPA_SUPPLICANT_MAIN_INTERFACE,
-												  NULL,
-												  &error);
-	if (!proxy->m_mainIfProxy) {
-		printf("Can not create an interface proxy for the main interface \n");
-		printf("Error Message: %s \n", error->message);
-	} else {
-		printf("Created the proxy for the main interface successfully \n");
-	}
-
-	proxy->m_ifIfProxy = g_dbus_proxy_new_sync (connection,
-			                                    G_DBUS_PROXY_FLAGS_NONE,
-								  				NULL,
-												WPA_SUPPLICANT_BUS_NAME,
-												WPA_SUPPLICANT_MAIN_OBJECT_PATH,
-												WPA_SUPPLICANT_INTERFACE_INTERFACE,
-												NULL,
-												&error);
-	if (!proxy->m_ifIfProxy) {
-		printf("Can not create an interface proxy for the Interface interface \n");
-		printf("Error Message: %s \n", error->message);
-	} else {
-		printf("Created the proxy for the Interface interface successfully \n");
-	}
-
-
-    //Register for the signals for Main Interface
-    g_signal_connect ((proxy->m_mainIfProxy),
-    			      "g-signal",
-    				   G_CALLBACK(signalNotify),
-    				   (void *)proxy);
-
-    //Register for the signals for Interface Interface
-    g_signal_connect ((proxy->m_ifIfProxy),
-    			      "g-signal",
-    				   G_CALLBACK(signalNotify),
-    				   (void *)proxy);
-
-    //Next step is to collect property values
-    getProp_dbgLvl(proxy);
-    getProp_dbgShowTS(proxy);
-    getProp_dbgShowKeys(proxy);
-    getProp_eapMethods(proxy);
-    getProp_interfaces(proxy);
 
     #if 0 //will use some of it later
 
@@ -479,38 +341,4 @@ void onObjectRemoved (GDBusObjectManager *manager,
 					  NULL);
 					  */
 #endif
-
-    return;
-}
-
-void wpa_supplicantClient_proxyObject_StopFollowing(wpa_supplicantClient_ProxyObject *proxy) {
-
-	//TODO I need to add disconnect of signals and release of interfaces and objects
-	return;
-}
-
-void wpa_supplicantClient_proxyObject_Stop (wpa_supplicantClient_ProxyObject *proxy){
-	printf("Entering wpa_supplicantClient_ProxyObject_Stop() \n");
-
-	if (!proxy) {
-		printf("NULL is passed to the function wpa_supplicantClient_ProxyObject_Start() \n");
-		return;
-	}
-
-	return;
-}
-
-void wpa_supplicantClient_proxyObject_Destroy(wpa_supplicantClient_ProxyObject *proxy) {
-	printf("Entering wpa_supplicantClient_ProxyObject_Destroy() \n");
-
-	if (!proxy) {
-		printf("NULL is passed to wpa_supplicantClient_ProxyObject_Destroy() ... Exiting \n");
-		return;
-	}
-
-	//finally free the object
-	free(proxy);
-
-	return;
-}
 

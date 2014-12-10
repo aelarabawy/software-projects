@@ -18,7 +18,7 @@ typedef enum {
 } NameWatcherEventType;
 
 typedef struct wpa_supplicantClient_nameWatcher {
-	char m_busName [BUS_NAME_MAX_LEN];
+	char m_busName [MAX_LEN_NAME];
 	guint m_watchId;
 
 	//Notification Call back function

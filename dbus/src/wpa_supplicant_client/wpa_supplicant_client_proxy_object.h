@@ -31,4 +31,9 @@ void wpa_supplicantClient_proxyObject_StartFollowing(wpa_supplicantClient_ProxyO
 		                                             GDBusConnection *);
 void wpa_supplicantClient_proxyObject_StopFollowing(wpa_supplicantClient_ProxyObject *);
 
+
+void wpa_supplicantClient_proxyObject_SetDbgLvl (wpa_supplicantClient_ProxyObject *, ClientDbgLvl);
+void wpa_supplicantClient_proxyObject_SetShowTS (wpa_supplicantClient_ProxyObject *, bool);
+void wpa_supplicantClient_proxyObject_SetShowKeys (wpa_supplicantClient_ProxyObject *, bool);
+
 #endif /* WPA_SUPPLICANT_CLIENT_PROXY_OBJECT_H_ */

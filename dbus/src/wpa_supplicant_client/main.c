@@ -13,7 +13,8 @@ int main (int argc, char* argv[]) {
 	printf ("Starting the wpa_supplicant Client Program \n");
 
 	//Initialize the Client
-	wpa_supplicantClient * client = wpa_supplicantClient_Init();
+	wpa_supplicantClient * client = wpa_supplicantClient_Init("fi.w1.wpa_supplicant1",  //Bus Name
+			                                                  "/fi/w1/wpa_supplicant1");//Object Path
 	if (!client){
 		printf("Can not Initialize the wpa_supplicant Client ... Exiting\n");
 		return -1;

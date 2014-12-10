@@ -15,7 +15,7 @@
 #include <gio/gio.h>
 
 #define SYNC_API 1
-#define BUS_NAME_MAX_LEN 100
+#define MAX_LEN_NAME 100
 
 #define bool unsigned long
 

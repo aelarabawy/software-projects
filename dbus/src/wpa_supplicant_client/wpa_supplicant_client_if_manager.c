@@ -1,14 +1,14 @@
 /*
- * wpa_supplicant_client_interface_manager.c
+ * wpa_supplicant_client_if_manager.c
  *
  *  Created on: Dec 4, 2014
  *      Author: aelarabawy
  */
 
-#include "wpa_supplicant_client_interface_manager.h"
+#include "wpa_supplicant_client_if_manager.h"
 
 
-wpa_supplicantClient_ifManager *wpa_supplicantClient_ifManager_Init () {
+wpa_supplicantClient_ifManager *wpa_supplicantClient_ifManager_Init (char *busName) {
 	wpa_supplicantClient_ifManager *manager = malloc(sizeof(wpa_supplicantClient_ifManager));
     if (!manager) {
     	printf("Failed to allocate the Interface Manager Object ... Exiting\n");
@@ -16,15 +16,20 @@ wpa_supplicantClient_ifManager *wpa_supplicantClient_ifManager_Init () {
     }
     memset(manager, 0, sizeof(wpa_supplicantClient_ifManager));
 
+    strcpy(manager->m_busName, busName);
+
 	return manager;
 }
 
-void wpa_supplicantClient_ifManager_Start (wpa_supplicantClient_ifManager *manager) {
+void wpa_supplicantClient_ifManager_Start (wpa_supplicantClient_ifManager *manager,
+		                                   void *connection) {
 
 	if (!manager){
 		printf("Passing NULL to the function ...Exiting\n");
 		return;
 	}
+
+	manager->m_dbusConnection = connection;
 
 	return;
 }
@@ -71,7 +76,9 @@ void wpa_supplicantClient_ifManager_AddIf(wpa_supplicantClient_ifManager* mgr, c
     memset(ifRec, 0, sizeof(interfaceList));
 
     //Now initializing the Interface
-    ifRec->m_interface = wpa_supplicantClient_if_Init(ifPathName);
+    ifRec->m_interface = wpa_supplicantClient_if_Init(mgr->m_busName,
+    		                                          ifPathName,
+													  mgr->m_dbusConnection);
     if (!ifRec->m_interface) {
     	printf("Failed to initialize the Interface Record .. exit\n");
     	return;
@@ -121,3 +128,8 @@ void wpa_supplicantClient_ifManager_RemIf(wpa_supplicantClient_ifManager* mgr, c
 
 	return;
 }
+
+
+
+//Private Functions
+///////////////////

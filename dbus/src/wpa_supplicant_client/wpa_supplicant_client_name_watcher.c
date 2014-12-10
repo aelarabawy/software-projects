@@ -8,9 +8,10 @@
 #include "common.h"
 #include "wpa_supplicant_client_name_watcher.h"
 
-//Prototypes for call back functions
-void wpa_supplicant_nameWatcher_OnNameUp (GDBusConnection *, const gchar *, const gchar *, gpointer);
-void wpa_supplicant_nameWatcher_OnNameDown (GDBusConnection *, const gchar *, gpointer);
+//Prototypes for Private functions
+static void onNameUp (GDBusConnection *, const gchar *, const gchar *, gpointer);
+static void onNameDown (GDBusConnection *, const gchar *, gpointer);
+//End of Prototypes for Private Functions
 
 wpa_supplicantClient_nameWatcher * wpa_supplicantClient_nameWatcher_Init (char *busName,
 		                                                                  void *notifyCb,
@@ -44,8 +45,8 @@ void wpa_supplicantClient_nameWatcher_Start (wpa_supplicantClient_nameWatcher *n
 	nameWatcher->m_watchId = g_bus_watch_name (G_BUS_TYPE_SYSTEM,
                                                nameWatcher->m_busName,
 			                                   G_BUS_NAME_WATCHER_FLAGS_NONE,
-							                   wpa_supplicant_nameWatcher_OnNameUp,
-							                   wpa_supplicant_nameWatcher_OnNameDown,
+							                   onNameUp,
+							                   onNameDown,
 			                                   (gpointer) nameWatcher,
 			                                   NULL);
 
@@ -82,11 +83,15 @@ void wpa_supplicantClient_nameWatcher_Destroy (wpa_supplicantClient_nameWatcher 
 	free (nameWatcher);
 }
 
-void wpa_supplicant_nameWatcher_OnNameUp (GDBusConnection *connection,
-		                                  const gchar * busName,
-		 		   		                  const gchar * nameOwner,
-						                  gpointer userData) {
-	printf ("Entering wpa_supplicant_nameWatcher_OnNameUp()\n");
+
+//Private Functions
+///////////////////
+
+static void onNameUp (GDBusConnection *connection,
+		              const gchar * busName,
+		 		   	  const gchar * nameOwner,
+					  gpointer userData) {
+	printf ("Entering onNameUp()\n");
     printf ("----- BusName = %s \n", busName);
 	printf ("----- Owner Unique Name = %s \n", nameOwner);
 	printf ("----- Connection = %p \n", connection);
@@ -107,10 +112,10 @@ void wpa_supplicant_nameWatcher_OnNameUp (GDBusConnection *connection,
 	return;
 }
 
-void wpa_supplicant_nameWatcher_OnNameDown (GDBusConnection *connection,
-	                                        const gchar * busName,
-				       	  	                gpointer userData) {
-	printf ("Entering wpa_supplicant_nameWatcher_OnNameDown()\n");
+static void onNameDown (GDBusConnection *connection,
+	                    const gchar * busName,
+		                gpointer userData) {
+	printf ("Entering onNameDown()\n");
     printf ("----- BusName = %s \n", busName);
 	printf ("----- Connection = %p \n", connection);
 
@@ -129,4 +134,3 @@ void wpa_supplicant_nameWatcher_OnNameDown (GDBusConnection *connection,
 
 	return;
 }
-
