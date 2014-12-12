@@ -9,9 +9,12 @@
 
 
 wpa_supplicantClient_bssManager *wpa_supplicantClient_bssManager_Init (char *busName, void* connection) {
+	ENTER();
+
 	wpa_supplicantClient_bssManager *manager = malloc(sizeof(wpa_supplicantClient_bssManager));
     if (!manager) {
-    	printf("Failed to allocate the BSS Manager Object ... Exiting\n");
+    	ALLOC_FAIL("manager");
+    	EXIT_WITH_ERROR();
     	return NULL;
     }
     memset(manager, 0, sizeof(wpa_supplicantClient_bssManager));
@@ -19,43 +22,54 @@ wpa_supplicantClient_bssManager *wpa_supplicantClient_bssManager_Init (char *bus
     strcpy(manager->m_busName, busName);
     manager->m_dbusConnection = connection;
 
+    EXIT();
     return manager;
 }
 
 void wpa_supplicantClient_bssManager_Start (wpa_supplicantClient_bssManager *manager) {
+	ENTER();
 
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_bssManager_Stop (wpa_supplicantClient_bssManager *manager) {
 
+	ENTER();
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_bssManager_Destroy (wpa_supplicantClient_bssManager *manager) {
 
+	ENTER();
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("Passing NULL to the function ...Exiting");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	//Free the manager
 	free(manager);
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_bssManager_AddBss(wpa_supplicantClient_bssManager* mgr, char* pathName) {
+	ENTER();
 
 	bssList *bssRec = (bssList *)&(mgr->m_bssGroup);
 
@@ -66,7 +80,8 @@ void wpa_supplicantClient_bssManager_AddBss(wpa_supplicantClient_bssManager* mgr
 	//Create a new Record;
 	bssRec->m_next = (bssList *)malloc(sizeof(bssList));
 	if(!bssRec) {
-		printf("Failed to create the bssList structure to hold a new BSS\n");
+		ALLOC_FAIL("bssRec");
+		EXIT_WITH_ERROR();
 	    return;
 	}
 	bssRec = bssRec->m_next;
@@ -77,17 +92,20 @@ void wpa_supplicantClient_bssManager_AddBss(wpa_supplicantClient_bssManager* mgr
     		                                      pathName,
 												  mgr->m_dbusConnection);
     if (!bssRec->m_bss) {
-    	printf("Failed to initialize the BSS Record .. exit\n");
+    	ERROR("Failed to initialize the BSS Record .. exit");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     //Now starting the BSS
     wpa_supplicantClient_bss_Start(bssRec->m_bss);
 
+    EXIT();
 	return;
 }
 
 void wpa_supplicantClient_bssManager_RemBss(wpa_supplicantClient_bssManager* mgr, char* pathName) {
+	ENTER();
 
 	bssList *bssRec = mgr->m_bssGroup.m_next;
 	bssList *prevRec = NULL;
@@ -102,7 +120,8 @@ void wpa_supplicantClient_bssManager_RemBss(wpa_supplicantClient_bssManager* mgr
 	}
 
 	if (!bssRec) {
-		printf("Can not find the BSS with PathName %s to delete\n", pathName);
+		ERROR("Can not find the BSS with PathName %s to delete", pathName);
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -123,6 +142,7 @@ void wpa_supplicantClient_bssManager_RemBss(wpa_supplicantClient_bssManager* mgr
 	//Now we can delete the bssRec
 	free(bssRec);
 
+	EXIT();
 	return;
 }
 

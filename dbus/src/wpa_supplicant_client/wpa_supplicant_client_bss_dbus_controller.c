@@ -17,10 +17,11 @@ wpa_supplicantClient_bss_dbusController *wpa_supplicantClient_bss_dbusController
 																					   void *connection,
 		                                                                               void *notifyCb,
 		                                                                               void *parent) {
+	ENTER();
 
     wpa_supplicantClient_bss_dbusController *controller = malloc(sizeof(wpa_supplicantClient_bss_dbusController));
     if (!controller) {
-    	printf("Failed to allocate the BSS D-Bus Object ... Exiting\n");
+    	ALLOC_FAIL("controller");
     	goto FAIL_CONTROLLER;
     }
 	memset (controller, 0, sizeof(wpa_supplicantClient_bss_dbusController));
@@ -35,7 +36,7 @@ wpa_supplicantClient_bss_dbusController *wpa_supplicantClient_bss_dbusController
 
 	controller->m_proxyIntrospectable = wpa_supplicantClient_proxyIntrospectable_Init(busName, objectPath);
 	if (!controller->m_proxyIntrospectable) {
-		printf("Failed to Initialize the Proxy Introspectable BSS Object... Exiting\n");
+		ERROR("Failed to Initialize the Proxy Introspectable BSS Object... Exiting");
 
 		goto FAIL_PROXY_INTROSPECTABLE;
 	}
@@ -45,19 +46,25 @@ wpa_supplicantClient_bss_dbusController *wpa_supplicantClient_bss_dbusController
 
 FAIL_PROXY_INTROSPECTABLE:
 	free(controller);
+
 FAIL_CONTROLLER:
+    EXIT_WITH_ERROR();
     return NULL;
 
 SUCCESS:
+	EXIT();
     return controller;
 }
 
 void wpa_supplicantClient_bss_dbusController_Start (wpa_supplicantClient_bss_dbusController *controller) {
 
+	ENTER();
+
 	GError * error = NULL;
 
 	if (!controller){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -69,7 +76,8 @@ void wpa_supplicantClient_bss_dbusController_Start (wpa_supplicantClient_bss_dbu
 	controller->m_objectProxy = g_dbus_object_proxy_new (controller->m_connection,
 			                                             controller->m_objectPath);
 	if (!controller->m_objectProxy) {
-		printf ("Failed to create an object proxy for the BSS \n");
+		ERROR("Failed to create an object proxy for the BSS ");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -82,11 +90,15 @@ void wpa_supplicantClient_bss_dbusController_Start (wpa_supplicantClient_bss_dbu
 												       NULL,
 												       &error);
 	if (!controller->m_mainIfProxy) {
-		printf("Can not create a proxy for the BSS interface \n");
-		printf("Error Message: %s \n", error->message);
-	} else {
-		printf("Created the proxy for the BSS interface successfully \n");
+		ERROR("Can not create a proxy for the BSS interface ");
+		ERROR("Error Message: %s ", error->message);
+
+		EXIT_WITH_ERROR();
+		return;
 	}
+
+	PROGRESS("Created the proxy for the BSS interface successfully ");
+
 
 	//Then Register for the signals
 	registerSignals(controller);
@@ -94,14 +106,18 @@ void wpa_supplicantClient_bss_dbusController_Start (wpa_supplicantClient_bss_dbu
 	//Get the Properties
 	getProperties(controller);
 
+	EXIT();
 	return;
 }
 
 
 void wpa_supplicantClient_bss_dbusController_Stop (wpa_supplicantClient_bss_dbusController *controller) {
 
+	ENTER();
+
 	if (!controller) {
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -113,14 +129,18 @@ void wpa_supplicantClient_bss_dbusController_Stop (wpa_supplicantClient_bss_dbus
 	//Stop the Proxy Introspectable
 	wpa_supplicantClient_proxyIntrospectable_Stop(controller->m_proxyIntrospectable);
 
+	EXIT();
 	return;
 }
 
 
 void wpa_supplicantClient_bss_dbusController_Destroy (wpa_supplicantClient_bss_dbusController *controller) {
 
+	ENTER();
+
 	if (!controller) {
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -131,6 +151,7 @@ void wpa_supplicantClient_bss_dbusController_Destroy (wpa_supplicantClient_bss_d
 	//Finally, we free the controller
 	free (controller);
 
+	EXIT();
 	return;
 }
 
@@ -144,17 +165,21 @@ static void signalNotify (GDBusProxy *dbusIfProxy,
                           gchar *signal,
                           GVariant *parameter,
                           gpointer userData) {
-	printf("Entering BSS signalNotify() :\n");
-	printf("------ Sender: %s\n", sender);
-	printf("------ Signal: %s\n", signal);
+	ENTER();
+	INFO("------ Sender: %s", sender);
+	INFO("------ Signal: %s", signal);
 
 	//First Get the controller
 	wpa_supplicantClient_bss_dbusController *controller = (wpa_supplicantClient_bss_dbusController *)userData;
 
-	printf("Received an Invalid/UnSupported Signal");
+	ERROR("Received an Invalid/UnSupported Signal");
+	EXIT_WITH_ERROR();
+	return;
 }
 
 static void getProp_bssid(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
     GVariant *v;
     GVariantIter *iter;
     unsigned char bssid[10];
@@ -163,13 +188,14 @@ static void getProp_bssid(wpa_supplicantClient_bss_dbusController *controller) {
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "BSSID");
     if (!v) {
-    	printf("Failed to get the property for BSSID\n");
+    	ERROR("Failed to get the property for BSSID");
+    	EXIT_WITH_ERROR();
     	return;
     }
     index = 1;
     g_variant_get(v, "ay", &iter);
     while (g_variant_iter_loop(iter, "y", &bssid[index])) {
-    	printf("BSSID[%d] = %d\n", index -1, bssid[index]);
+    	INFO("BSSID[%d] = %d", index -1, bssid[index]);
     	index++;
     }
 
@@ -181,9 +207,14 @@ static void getProp_bssid(wpa_supplicantClient_bss_dbusController *controller) {
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 static void getProp_ssid(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
     GVariant *v;
     GVariantIter *iter;
     unsigned char ssid[10];
@@ -192,13 +223,14 @@ static void getProp_ssid(wpa_supplicantClient_bss_dbusController *controller) {
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "SSID");
     if (!v) {
-    	printf("Failed to get the property for SSID\n");
+    	ERROR("Failed to get the property for SSID");
+    	EXIT_WITH_ERROR();
     	return;
     }
     index = 1;
     g_variant_get(v, "ay", &iter);
     while (g_variant_iter_loop(iter, "y", &ssid[index])) {
-    	printf("SSID[%d] = %d\n", index -1, ssid[index]);
+    	INFO("SSID[%d] = %d", index -1, ssid[index]);
     	index++;
     }
 
@@ -210,30 +242,41 @@ static void getProp_ssid(wpa_supplicantClient_bss_dbusController *controller) {
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 static void getProp_privacy(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
 	GVariant *v;
     bool privacy;
 
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
 	  	                                  "Privacy");
     if (!v) {
-    	printf("Failed to get the property for Privacy\n");
+    	ERROR("Failed to get the property for Privacy");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "b", &privacy);
-    printf("Privacy Property is %d\n",(int)privacy);
+    INFO("Privacy Property is %d",(int)privacy);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, BSS_EVENT_TYPE_SET_PRIVACY , (void *)privacy);
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 static void getProp_mode(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
     GVariant *v;
     BSS_MODE mode;
     gchar *str;
@@ -241,19 +284,20 @@ static void getProp_mode(wpa_supplicantClient_bss_dbusController *controller) {
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "Mode");
     if (!v) {
-    	printf("Failed to get the property for Mode\n");
+    	ERROR("Failed to get the property for Mode");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "s",&str);
-    printf("Mode Property is %s\n",str);
+    INFO("Mode Property is %s",str);
 
     if (!strcmp(str, "ad-hoc")) {
     	mode = BSS_MODE_AD_HOC;
     } else if (!strcmp(str, "infrastructure")) {
     	mode = BSS_MODE_INFRASTRUCTURE;
     } else {
-    	printf("Received Invalid Mode: %s\n", str);
+    	ERROR("Received Invalid Mode: %s", str);
     }
 
     g_free(str);
@@ -263,44 +307,56 @@ static void getProp_mode(wpa_supplicantClient_bss_dbusController *controller) {
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 static void getProp_freq(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
 	GVariant *v;
     unsigned long freq;
 
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
 	  	                                  "Frequency");
     if (!v) {
-    	printf("Failed to get the property for Frequency\n");
+    	ERROR("Failed to get the property for Frequency");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "q", &freq);
 
-    printf("Frequency Property is %d\n",(int)freq);
+    INFO("Frequency Property is %d",(int)freq);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, BSS_EVENT_TYPE_SET_FREQ, (void *)freq);
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 static void getProp_signal(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
 	GVariant *v;
     long signal;
 
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
 	  	                                  "Signal");
     if (!v) {
-    	printf("Failed to get the property for Signal\n");
+    	ERROR("Failed to get the property for Signal");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "n", &signal);
 
-    printf("Frequency Property is %d\n",(int)signal);
+    INFO("Signal Property is %d",(int)signal);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, BSS_EVENT_TYPE_SET_SIGNAL, (void *)signal);
@@ -308,9 +364,13 @@ static void getProp_signal(wpa_supplicantClient_bss_dbusController *controller) 
     //Cleanup
     g_variant_unref(v);
 
+    EXIT();
+    return;
 }
 
 static void getProp_rates(wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
     GVariant *v;
     GVariantIter *iter;
     unsigned long rate;
@@ -318,13 +378,14 @@ static void getProp_rates(wpa_supplicantClient_bss_dbusController *controller) {
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "Rates");
     if (!v) {
-    	printf("Failed to get the property for Rates\n");
+    	ERROR("Failed to get the property for Rates");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "au", &iter);
     while (g_variant_iter_loop(iter, "u", &rate)) {
-    	printf("New Rate: %d\n", rate);
+    	INFO("New Rate: %d", rate);
 
     	//Call the call back function
         controller->m_notifyCb(controller->m_parent, BSS_EVENT_TYPE_ADD_RATE, (void *)rate );
@@ -332,10 +393,15 @@ static void getProp_rates(wpa_supplicantClient_bss_dbusController *controller) {
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 
 static void getProperties (wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
     getProp_bssid(controller);
 	getProp_ssid(controller);
 	getProp_privacy(controller);
@@ -344,13 +410,19 @@ static void getProperties (wpa_supplicantClient_bss_dbusController *controller) 
 	getProp_signal(controller);
 
 	getProp_rates(controller);
+
+	EXIT();
+	return;
 }
 
 static void registerSignals (wpa_supplicantClient_bss_dbusController *controller) {
+	ENTER();
+
 	//Register for signals for the BSS interface
 	g_signal_connect (controller->m_mainIfProxy,
  			          "g-signal",
 				      G_CALLBACK(signalNotify),
 				      (void *)controller);
-
+	EXIT();
+	return;
 }

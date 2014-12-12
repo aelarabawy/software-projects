@@ -8,9 +8,13 @@
 #include "wpa_supplicant_client_network_mgr.h"
 
 wpa_supplicantClient_networkMgr *wpa_supplicantClient_networkMgr_Init (char *busName, void* connection) {
+
+	ENTER();
+
 	wpa_supplicantClient_networkMgr *manager = malloc(sizeof(wpa_supplicantClient_networkMgr));
     if (!manager) {
-    	printf("Failed to allocate the Network Manager Object ... Exiting\n");
+    	ALLOC_FAIL("manager");
+    	EXIT_WITH_ERROR();
     	return NULL;
     }
     memset(manager, 0, sizeof(wpa_supplicantClient_networkMgr));
@@ -18,44 +22,57 @@ wpa_supplicantClient_networkMgr *wpa_supplicantClient_networkMgr_Init (char *bus
     strcpy(manager->m_busName, busName);
     manager->m_dbusConnection = connection;
 
+    EXIT();
     return manager;
 }
 
 void wpa_supplicantClient_networkMgr_Start (wpa_supplicantClient_networkMgr *manager) {
+	ENTER();
 
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_networkMgr_Stop (wpa_supplicantClient_networkMgr *manager) {
+	ENTER();
 
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_networkMgr_Destroy (wpa_supplicantClient_networkMgr *manager) {
 
+	ENTER();
+
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	//Free the manager
 	free(manager);
 
+	EXIT();
 	return;
 }
 
 
 void wpa_supplicantClient_networkMgr_AddNetwork(wpa_supplicantClient_networkMgr* mgr, char* pathName) {
+
+	ENTER();
 
 	networkList *nwRec = (networkList *)&(mgr->m_networkGroup);
 
@@ -66,9 +83,11 @@ void wpa_supplicantClient_networkMgr_AddNetwork(wpa_supplicantClient_networkMgr*
 	//Create a new Record;
 	nwRec->m_next = (networkList *)malloc(sizeof(networkList));
 	if(!nwRec) {
-		printf("Failed to create the networkList structure to hold a new Network\n");
+		ALLOC_FAIL("nwRec");
+		EXIT_WITH_ERROR();
 	    return;
 	}
+
 	nwRec = nwRec->m_next;
     memset(nwRec, 0, sizeof(networkList));
 
@@ -77,17 +96,22 @@ void wpa_supplicantClient_networkMgr_AddNetwork(wpa_supplicantClient_networkMgr*
     		                                             pathName,
 										                 mgr->m_dbusConnection);
     if (!nwRec->m_network) {
-    	printf("Failed to initialize the Network Record .. exit\n");
+    	ERROR("Failed to initialize the Network Record .. exit");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     //Now starting the Network
+    PROGRESS("Starting the Network");
     wpa_supplicantClient_network_Start(nwRec->m_network);
 
+    EXIT();
 	return;
 }
 
 void wpa_supplicantClient_networkMgr_RemNetwork(wpa_supplicantClient_networkMgr* mgr, char* pathName) {
+
+	ENTER();
 
 	networkList *nwRec = mgr->m_networkGroup.m_next;
 	networkList *prevRec = NULL;
@@ -102,14 +126,17 @@ void wpa_supplicantClient_networkMgr_RemNetwork(wpa_supplicantClient_networkMgr*
 	}
 
 	if (!nwRec) {
-		printf("Can not find the Network with PathName %s to delete\n", pathName);
+		ERROR("Can not find the Network with PathName %s to delete", pathName);
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	//First Stop the Network
+	PROGRESS("Stop the Network");
 	wpa_supplicantClient_network_Stop(nwRec->m_network);
 
 	//Then Destroy the BSS
+	PROGRESS("Destroy the Network");
 	wpa_supplicantClient_network_Destroy(nwRec->m_network);
 
 	//Then remove the nwRec from the list
@@ -123,6 +150,7 @@ void wpa_supplicantClient_networkMgr_RemNetwork(wpa_supplicantClient_networkMgr*
 	//Now we can delete the nwRec
 	free(nwRec);
 
+	EXIT();
 	return;
 }
 

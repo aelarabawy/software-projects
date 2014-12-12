@@ -14,12 +14,13 @@ static void query4XmlDescription (wpa_supplicantClient_ProxyIntrospectable *, GD
 
 wpa_supplicantClient_ProxyIntrospectable *wpa_supplicantClient_proxyIntrospectable_Init(char *busName,
 		                                                                                char *objectPath) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Init() \n");
+	ENTER();
 
 	//First Create the object
 	wpa_supplicantClient_ProxyIntrospectable *proxy = malloc(sizeof(wpa_supplicantClient_ProxyIntrospectable));
 	if (!proxy){
-		printf ("Can not allocate a wpa_supplicantClient_ProxyIntrospectable Object ...Exiting\n");
+		ALLOC_FAIL("Can not allocate a wpa_supplicantClient_ProxyIntrospectable Object ...Exiting");
+		EXIT_WITH_ERROR();
 		return NULL;
 	}
 	memset(proxy, 0, sizeof(wpa_supplicantClient_ProxyIntrospectable));
@@ -27,40 +28,45 @@ wpa_supplicantClient_ProxyIntrospectable *wpa_supplicantClient_proxyIntrospectab
 	strcpy(proxy->m_busName, busName);
 	strcpy(proxy->m_objectPath, objectPath);
 
+	EXIT();
 	return proxy;
 }
 
 
 void wpa_supplicantClient_proxyIntrospectable_Start (wpa_supplicantClient_ProxyIntrospectable *proxy,
 		                                             GDBusConnection *connection) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Start() \n");
+	ENTER();
 
 	if (!proxy) {
-		printf("NULL is passed to the function wpa_supplicantClient_proxyIntrospectable_Start() \n");
+		NULL_POINTER("proxy");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	if (!connection) {
-		printf("NULL is passed for the connection to the function wpa_supplicantClient_proxyIntrospectable_Start() \n");
+		NULL_POINTER("connection");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	if (proxy->m_xmlDescription) {
-		printf("XML Description is already there, no need to query for it again...No action is performed\n");
+		WARN("XML Description is already there, no need to query for it again...No action is performed");
 	} else {
         query4XmlDescription(proxy, connection);
 	}
 
-	printf("XML Description:\n %s \n", proxy->m_xmlDescription);
+	INFO("XML Description: %s", proxy->m_xmlDescription);
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIntrospectable *proxy) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Stop() \n");
+	ENTER();
 
 	if (!proxy) {
-		printf("NULL is passed to the function wpa_supplicantClient_proxyIntrospectable_Stop() \n");
+		NULL_POINTER("proxy");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -72,25 +78,29 @@ void wpa_supplicantClient_proxyIntrospectable_Stop (wpa_supplicantClient_ProxyIn
 	g_object_unref(proxy->m_introspectionProxy);
 	proxy->m_introspectionProxy = NULL;
 
+	EXIT();
 	return;
 }
 
 
 void wpa_supplicantClient_proxyIntrospectable_Destroy(wpa_supplicantClient_ProxyIntrospectable *proxy) {
-	printf("Entering wpa_supplicantClient_proxyIntrospectable_Destroy() \n");
+	ENTER();
 
 	if (!proxy) {
-		printf("NULL is passed to wpa_supplicantClient_proxyIntrospectable_Destroy() ... Exiting \n");
-		return;
+		NULL_POINTER("proxy");
+		EXIT_WITH_ERROR();
 	}
 
 	//finally free the object
 	free(proxy);
 
+	EXIT();
 	return;
 }
 
 char *wpa_supplicantClient_proxyIntrospectable_GetXmlDescription(wpa_supplicantClient_ProxyIntrospectable *proxy) {
+	ENTER();
+	EXIT();
 	return proxy->m_xmlDescription;
 }
 
@@ -99,6 +109,7 @@ char *wpa_supplicantClient_proxyIntrospectable_GetXmlDescription(wpa_supplicantC
 ///////////////////
 static void query4XmlDescription (wpa_supplicantClient_ProxyIntrospectable *proxy,
  		       				      GDBusConnection *connection) {
+	ENTER();
 	GError * error = NULL;
 
 #if SYNC_API
@@ -111,11 +122,12 @@ static void query4XmlDescription (wpa_supplicantClient_ProxyIntrospectable *prox
 														 NULL,
 														 &error);
 	if (!proxy->m_introspectionProxy){
-		printf("Can not create the Introspection proxy \n");
-		printf("Error Message: %s \n", error->message);
+		ERROR("Can not create the Introspection proxy");
+		ERROR("Error Message: %s", error->message);
+		EXIT_WITH_ERROR();
 		return;
 	} else {
-		printf("Created the Introspection Proxy Interface successfully \n");
+		PROGRESS("Created the Introspection Proxy Interface successfully");
 	}
 
 
@@ -127,34 +139,36 @@ static void query4XmlDescription (wpa_supplicantClient_ProxyIntrospectable *prox
 										  NULL,
 										  &error);
 	if (!v){
-		printf("Failed to Introspect wpa_supplicant \n");
-		printf("Error Message: %s \n", error->message);
+		ERROR("Failed to Introspect wpa_supplicant");
+		ERROR("Error Message: %s", error->message);
 
 		//Free the proxy
 		g_object_unref(proxy->m_introspectionProxy);
 		proxy->m_introspectionProxy = NULL;
 
+		EXIT_WITH_ERROR();
 		return;
 	} else {
-		printf("Performed the Introspection Successfully \n");
+		PROGRESS("Performed the Introspection Successfully");
 	}
 #endif
 
 	g_variant_get(v, "(s)", &proxy->m_xmlDescription);
 	if (!proxy->m_xmlDescription) {
-		printf("Failed to allocate the string for XML Description\n");
+		ERROR("Failed to allocate the string for XML Description");
 
 		g_variant_unref(v);
 		//Free the proxy
 		g_object_unref(proxy->m_introspectionProxy);
 		proxy->m_introspectionProxy = NULL;
 
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	//Now we free the GVariant
 	g_variant_unref(v);
 
+	EXIT();
 	return;
 }
-

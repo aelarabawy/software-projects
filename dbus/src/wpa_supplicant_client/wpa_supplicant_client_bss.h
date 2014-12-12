@@ -11,7 +11,7 @@
 #include "common.h"
 #include "wpa_supplicant_client_bss_dbus_controller.h"
 
-#define NUM_RATES 10
+#define NUM_RATES 100
 
 typedef enum {
 	BSS_SIGNAL_UPDATED = 0

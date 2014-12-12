@@ -16,12 +16,13 @@ static void dbusControllerNotify (void *, ClientEventType, void*);
  */
 wpa_supplicantClient *wpa_supplicantClient_Init(char *busName,
 		                                        char *objectPath) {
-	printf("Entering wpa_supplicantClient_Init() \n");
+	ENTER();
 
 	//Create the Client Object
+	PROGRESS("Allocating the Client");
 	wpa_supplicantClient *client = malloc(sizeof(wpa_supplicantClient));
 	if (!client){
-		printf("Failed to allocate a wpa_supplicantClient Object ... Exiting \n");
+		ALLOC_FAIL("Failed to allocate a wpa_supplicantClient Object ... Exiting");
 
 		goto FAIL_CLIENT;
 	}
@@ -33,20 +34,22 @@ wpa_supplicantClient *wpa_supplicantClient_Init(char *busName,
 	strcpy(client->m_objectPath, objectPath);
 
 	//Initialize the D-Bus Controller
+	PROGRESS("Initialize the Client D-Bus Controller");
 	client->m_dbusController = wpa_supplicantClient_dbusController_Init(busName,
 			                                                            objectPath,
 																		dbusControllerNotify,
 			                                                            (void *)client);
 	if (!client->m_dbusController) {
-		printf("Failed to initialize the Client D-BUS Controller ... exiting\n");
+		ERROR("Failed to initialize the Client D-BUS Controller ... exiting");
 
 		goto FAIL_DBUS_CONTROLLER;
 	}
 
 	//Initialize the Interface Manager
+	PROGRESS("Initialize the Interface Manager");
 	client->m_ifManager = wpa_supplicantClient_ifManager_Init(busName);
 	if (!client->m_ifManager) {
-		printf("Failed to initialize the Client Interface Manager ... exiting\n");
+		ERROR("Failed to initialize the Client Interface Manager ... exiting");
 
 		goto FAIL_IF_MANAGER;
 	}
@@ -58,33 +61,40 @@ FAIL_IF_MANAGER:
 	wpa_supplicantClient_dbusController_Destroy(client->m_dbusController);
 FAIL_DBUS_CONTROLLER:
 	free(client);
+
 FAIL_CLIENT:
+	EXIT_WITH_ERROR();
     return NULL;
 
 SUCCESS:
+	EXIT();
 	return client;
 }
 
 
 void wpa_supplicantClient_Start (wpa_supplicantClient *client) {
-	printf("Entering wpa_supplicantClient_Start() \n");
+	ENTER();
 
 	if (!client){
-		printf("NULL is passed for client in wpa_supplicantClient_Start()....Exiting \n");
+		NULL_POINTER("The Client");
+		EXIT_WITH_ERROR();
 		return ;
 	}
 
 	//Start the D-Bus Controller
+	PROGRESS("Start the Client D-Bus Controller");
 	wpa_supplicantClient_dbusController_Start(client->m_dbusController);
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_Stop (wpa_supplicantClient *client) {
-	printf("Entering wpa_supplicantClient_Stop() \n");
+	ENTER();
 
 	if (!client){
-		printf("NULL is passed for client in wpa_supplicantClient_Stop()....Exiting \n");
+		NULL_POINTER("The Client");
+		EXIT_WITH_ERROR();
 		return ;
 	}
 
@@ -94,6 +104,7 @@ void wpa_supplicantClient_Stop (wpa_supplicantClient *client) {
 	//Stop the D-Bus Controller
 	wpa_supplicantClient_dbusController_Stop(client->m_dbusController);
 
+	EXIT();
 	return;
 }
 
@@ -103,10 +114,11 @@ void wpa_supplicantClient_Stop (wpa_supplicantClient *client) {
  * This function performs required cleanup before exit
  */
 void wpa_supplicantClient_Destroy (wpa_supplicantClient *client) {
-	printf("Entering wpa_supplicantClient_Destroy() \n");
+	ENTER();
 
 	if (!client){
-		printf("NULL is passed for client....Exiting \n");
+		NULL_POINTER("The Client");
+		EXIT_WITH_ERROR();
 		return ;
 	}
 
@@ -119,6 +131,7 @@ void wpa_supplicantClient_Destroy (wpa_supplicantClient *client) {
 	//Finally, we free the client
 	free (client);
 
+	EXIT();
 	return;
 }
 
@@ -127,45 +140,62 @@ void wpa_supplicantClient_Destroy (wpa_supplicantClient *client) {
  * Public Get/Set methods
  * */
 ClientDbgLvl wpa_supplicantClient_GetDbgLvl (wpa_supplicantClient *client) {
+	ENTER();
+	EXIT();
 	return client->m_dbgLvl;
 }
 
 void wpa_supplicantClient_SetDbgLvl(wpa_supplicantClient *client, ClientDbgLvl lvl) {
+	ENTER();
 	wpa_supplicantClient_dbusController_SetDbgLvl(client->m_dbusController, lvl);
 	client->m_dbgLvl = lvl;
+	EXIT();
 }
 
 bool wpa_supplicantClient_GetDbgShowTS (wpa_supplicantClient *client) {
+	ENTER();
+	EXIT();
 	return client->m_dbgShowTS;
 }
 
 void wpa_supplicantClient_SetDbgShowTS (wpa_supplicantClient *client, bool show) {
+	ENTER();
 	wpa_supplicantClient_dbusController_SetShowTS(client->m_dbusController, show);
 	client->m_dbgShowTS = show;
+	EXIT();
 }
 
 bool wpa_supplicantClient_GetDbgShowKeys (wpa_supplicantClient *client) {
+	ENTER();
+	EXIT();
 	return client->m_dbgShowKeys;
 }
 
 void wpa_supplicantClient_SetDbgShowKeys (wpa_supplicantClient *client, bool show) {
+	ENTER();
 	wpa_supplicantClient_dbusController_SetShowKeys(client->m_dbusController, show);
 	client->m_dbgShowKeys = show;
+	EXIT();
 }
 
 
 int wpa_supplicantClient_GetEapMethodCount (wpa_supplicantClient *client) {
+	ENTER();
+	EXIT();
 	return client->m_eapMethodCount;
 }
 
 EapMethod wpa_supplicantClient_GetDEapMethod (wpa_supplicantClient *client, int index) {
+	ENTER();
 	if (index >= client->m_eapMethodCount) {
-		printf("Invalid Index ... exiting");
+		ERROR("Invalid Index ... exiting");
+
+		EXIT_WITH_ERROR();
 		return EAP_NONE;
 	}
-	else {
-		return client->m_eapMethods[index];
-	}
+
+	EXIT();
+	return client->m_eapMethods[index];
 }
 
 
@@ -174,30 +204,35 @@ EapMethod wpa_supplicantClient_GetDEapMethod (wpa_supplicantClient *client, int 
 ///////////////////
 static void resumeStart(wpa_supplicantClient *client,
 		                void *connection) {
+	ENTER();
 
 	//Start the Interface Manager
+	PROGRESS("Start the Interface Manager");
 	wpa_supplicantClient_ifManager_Start(client->m_ifManager,
 			                             connection);
 
+	EXIT();
 	return;
 }
 
 //Notification function (call back from dbus controller)
 static void dbusControllerNotify (void *parent, ClientEventType type, void* args) {
-    printf("Entered the dbusControllerNotify() Call back function with type = %d and value %d\n", type, (int)args);
+	ENTER_FUNC("Type = %d , Value = %d",type, args);
 
 	wpa_supplicantClient *client = (wpa_supplicantClient *)parent;
 
 	switch (type) {
 	case CLIENT_EVENT_TYPE_READY:
+		INFO("CLIENT_EVENT_TYPE_READY");
 		client->m_state = CLIENT_STATE_READY;
 		resumeStart(client, args); //args = D-Bus Connection
 		break;
 
 	case CLIENT_EVENT_TYPE_ADD_IF:
 		{
+			INFO("CLIENT_EVENT_TYPE_ADD_IF");
 			char *interface = (char *)args;
-			printf("Client: Adding Interface with Object Path %s\n", interface);
+			PROGRESS("Client: Adding Interface with Object Path %s", interface);
 			wpa_supplicantClient_ifManager_AddIf(client->m_ifManager,
 												 interface);
 		}
@@ -205,34 +240,40 @@ static void dbusControllerNotify (void *parent, ClientEventType type, void* args
 
 	case CLIENT_EVENT_TYPE_REM_IF:
 		{
+			INFO("CLIENT_EVENT_TYPE_REM_IF");
 			char *interface = (char *)args;
-			printf("Client: Removing Interface with Object Path %s\n", interface);
+			PROGRESS("Client: Removing Interface with Object Path %s", interface);
 			wpa_supplicantClient_ifManager_RemIf(client->m_ifManager,
 					                             interface);
 		}
 		break;
 
 	case CLIENT_EVENT_TYPE_SET_DBG_LEVEL:
+		INFO("CLIENT_EVENT_TYPE_SET_DBG_LEVEL");
 		client->m_dbgLvl = (ClientDbgLvl)args;
 		break;
 
 	case CLIENT_EVENT_TYPE_SET_SHOW_TS:
+		INFO("CLIENT_EVENT_TYPE_SET_SHOW_TS");
 		client->m_dbgShowTS = (bool)args;
 		break;
 
 	case CLIENT_EVENT_TYPE_SET_SHOW_KEYS:
+		INFO("CLIENT_EVENT_TYPE_SET_SHOW_KEYS");
 		client->m_dbgShowKeys = (bool)args;
 		break;
 
 	case CLIENT_EVENT_TYPE_ADD_EAP_METHOD:
+		INFO("CLIENT_EVENT_TYPE_ADD_EAP_METHOD");
 		client->m_eapMethods[client->m_eapMethodCount++] = (EapMethod)args;
 		break;
 
 	default:
-		printf("Invalid Client Event Type %d\n", type);
+		ERROR("Invalid Client Event Type %d", type);
 		break;
 	}
 
+	EXIT();
 	return;
 }
 

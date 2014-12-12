@@ -9,56 +9,72 @@
 
 
 wpa_supplicantClient_ifManager *wpa_supplicantClient_ifManager_Init (char *busName) {
+
+	ENTER();
+
 	wpa_supplicantClient_ifManager *manager = malloc(sizeof(wpa_supplicantClient_ifManager));
     if (!manager) {
-    	printf("Failed to allocate the Interface Manager Object ... Exiting\n");
+    	ALLOC_FAIL("manager");
+    	EXIT_WITH_ERROR();
     	return NULL;
     }
     memset(manager, 0, sizeof(wpa_supplicantClient_ifManager));
 
     strcpy(manager->m_busName, busName);
 
+    EXIT();
 	return manager;
 }
 
 void wpa_supplicantClient_ifManager_Start (wpa_supplicantClient_ifManager *manager,
 		                                   void *connection) {
+	ENTER();
 
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	manager->m_dbusConnection = connection;
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_ifManager_Stop (wpa_supplicantClient_ifManager *manager) {
 
+	ENTER();
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_ifManager_Destroy (wpa_supplicantClient_ifManager *manager) {
+	ENTER();
 
 	if (!manager){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("manager");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	//Finally free the object
 	free(manager);
 
+	EXIT();
 	return;
 }
 
 
 void wpa_supplicantClient_ifManager_AddIf(wpa_supplicantClient_ifManager* mgr, char* ifPathName) {
+
+	ENTER();
 
 	interfaceList *ifRec = (interfaceList *)&(mgr->m_interfaceGroup);
 
@@ -69,7 +85,8 @@ void wpa_supplicantClient_ifManager_AddIf(wpa_supplicantClient_ifManager* mgr, c
 	//Create a new Record;
 	ifRec->m_next = (interfaceList *)malloc(sizeof(interfaceList));
 	if(!ifRec) {
-		printf("Failed to create the interfaceList structure to hold a new interface\n");
+		ALLOC_FAIL("ifRec");
+		EXIT_WITH_ERROR();
 	    return;
 	}
 	ifRec = ifRec->m_next;
@@ -80,17 +97,21 @@ void wpa_supplicantClient_ifManager_AddIf(wpa_supplicantClient_ifManager* mgr, c
     		                                          ifPathName,
 													  mgr->m_dbusConnection);
     if (!ifRec->m_interface) {
-    	printf("Failed to initialize the Interface Record .. exit\n");
+    	ERROR("Failed to initialize the Interface Record .. exit");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     //Now starting the interface
     wpa_supplicantClient_if_Start(ifRec->m_interface);
 
+    EXIT();
 	return;
 }
 
 void wpa_supplicantClient_ifManager_RemIf(wpa_supplicantClient_ifManager* mgr, char* ifPathName) {
+
+	ENTER();
 
 	interfaceList *ifRec = mgr->m_interfaceGroup.m_next;
 	interfaceList *prevRec = NULL;
@@ -105,7 +126,8 @@ void wpa_supplicantClient_ifManager_RemIf(wpa_supplicantClient_ifManager* mgr, c
 	}
 
 	if (!ifRec) {
-		printf("Can not find the interface with PathName %s to delete\n", ifPathName);
+		ERROR("Can not find the interface with PathName %s to delete", ifPathName);
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -126,6 +148,7 @@ void wpa_supplicantClient_ifManager_RemIf(wpa_supplicantClient_ifManager* mgr, c
 	//Now we can delete the ifRec
 	free(ifRec);
 
+	EXIT();
 	return;
 }
 

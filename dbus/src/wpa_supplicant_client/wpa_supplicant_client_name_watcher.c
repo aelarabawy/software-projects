@@ -16,12 +16,14 @@ static void onNameDown (GDBusConnection *, const gchar *, gpointer);
 wpa_supplicantClient_nameWatcher * wpa_supplicantClient_nameWatcher_Init (char *busName,
 		                                                                  void *notifyCb,
 																		  void *parent) {
-	printf ("Entering wpa_supplicantClient_nameWatcher_Init(), busName = %s\n", busName);
+	ENTER_FUNC("busName = %s", busName);
+
 
 	//Create the Name Watcher Object
 	wpa_supplicantClient_nameWatcher * nameWatcher = malloc(sizeof(wpa_supplicantClient_nameWatcher));
 	if (!nameWatcher) {
-		printf ("Failed to allocate a wpa_supplicantClient_nameWatcher Object .. Exiting\n");
+		ALLOC_FAIL("nameWatcher");
+		EXIT_WITH_ERROR();
 		return NULL;
 	}
 	memset (nameWatcher, 0, sizeof(wpa_supplicantClient_nameWatcher));
@@ -30,14 +32,17 @@ wpa_supplicantClient_nameWatcher * wpa_supplicantClient_nameWatcher_Init (char *
 	nameWatcher->m_notifyCb = notifyCb;
 	nameWatcher->m_parent = parent;
 
+	EXIT();
 	return nameWatcher;
 }
 
 void wpa_supplicantClient_nameWatcher_Start (wpa_supplicantClient_nameWatcher *nameWatcher) {
-	printf ("Entering wpa_supplicantClient_nameWatcher_Start()\n");
+
+	ENTER();
 
 	if (!nameWatcher){
-		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Start ... Doing nothing \n");
+		NULL_POINTER("nameWatcher");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -49,16 +54,16 @@ void wpa_supplicantClient_nameWatcher_Start (wpa_supplicantClient_nameWatcher *n
 							                   onNameDown,
 			                                   (gpointer) nameWatcher,
 			                                   NULL);
-
-
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_nameWatcher_Stop (wpa_supplicantClient_nameWatcher *nameWatcher) {
-	printf ("Entering wpa_supplicantClient_nameWatcher_Stop()\n");
+	ENTER();
 
 	if (!nameWatcher){
-		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Stop ... Doing nothing \n");
+		NULL_POINTER("nameWatcher");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -68,19 +73,23 @@ void wpa_supplicantClient_nameWatcher_Stop (wpa_supplicantClient_nameWatcher *na
 	}
 	nameWatcher->m_watchId = 0;
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_nameWatcher_Destroy (wpa_supplicantClient_nameWatcher *nameWatcher) {
-	printf ("Entering wpa_supplicantClient_nameWatcher_Destroy()\n");
+	ENTER();
 
 	if (!nameWatcher){
-		printf ("NULL passed to wpa_supplicantClient_nameWatcher_Destroy ... Doing nothing \n");
+		ALLOC_FAIL("nameWatcher");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
 	//Finally, free the nameWatcher Object
 	free (nameWatcher);
+
+	EXIT();
 }
 
 
@@ -91,14 +100,16 @@ static void onNameUp (GDBusConnection *connection,
 		              const gchar * busName,
 		 		   	  const gchar * nameOwner,
 					  gpointer userData) {
-	printf ("Entering onNameUp()\n");
-    printf ("----- BusName = %s \n", busName);
-	printf ("----- Owner Unique Name = %s \n", nameOwner);
-	printf ("----- Connection = %p \n", connection);
+	ENTER();
+
+    INFO("----- BusName = %s", busName);
+	INFO("----- Owner Unique Name = %s", nameOwner);
+	INFO("----- Connection = %p", connection);
 
 	//Get the nameWatcher Object
 	if (!userData){
-		printf ("NULL passed to wpa_supplicant_nameWatcher_OnNameUp() ... Doing nothing \n");
+		NULL_POINTER("userData");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -109,19 +120,21 @@ static void onNameUp (GDBusConnection *connection,
 			                 NAME_WATCHER_EVENT_NAME_UP,
 			                 (void *)connection);
 
+	EXIT();
 	return;
 }
 
 static void onNameDown (GDBusConnection *connection,
 	                    const gchar * busName,
 		                gpointer userData) {
-	printf ("Entering onNameDown()\n");
-    printf ("----- BusName = %s \n", busName);
-	printf ("----- Connection = %p \n", connection);
+	ENTER();
+    INFO("----- BusName = %s", busName);
+	INFO("----- Connection = %p", connection);
 
 	//Get the nameWatcher Object
 	if (!userData){
-		printf ("NULL passed to wpa_supplicant_nameWatcher_OnNameDown() ... Doing nothing \n");
+		NULL_POINTER("userData");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -132,5 +145,6 @@ static void onNameDown (GDBusConnection *connection,
 			                 NAME_WATCHER_EVENT_NAME_DOWN,
 			                 (void *)connection);
 
+	EXIT();
 	return;
 }

@@ -25,9 +25,11 @@ wpa_supplicantClient_dbusController *wpa_supplicantClient_dbusController_Init (c
 		                                                                       char *objectPath,
 																			   void *notifyCb,
 		                                                                       void *parent) {
+	ENTER();
+
     wpa_supplicantClient_dbusController *controller = malloc(sizeof(wpa_supplicantClient_dbusController));
     if (!controller) {
-    	printf("Failed to allocate the Client D-Bus Object ... Exiting\n");
+    	ALLOC_FAIL("controller");
     	goto FAIL_CONTROLLER;
     }
 	memset (controller, 0, sizeof(wpa_supplicantClient_dbusController));
@@ -44,7 +46,7 @@ wpa_supplicantClient_dbusController *wpa_supplicantClient_dbusController_Init (c
 			                                                          OnNameWatchEventCb,
 																      (void *) controller);
 	if (!controller->m_nameWatcher) {
-		printf("Failed to initialize the Name Watcher ... exiting\n");
+		ERROR("Failed to initialize the Name Watcher ... exiting");
 
 		goto FAIL_NAME_WATCHER;
 	}
@@ -52,7 +54,7 @@ wpa_supplicantClient_dbusController *wpa_supplicantClient_dbusController_Init (c
 	controller->m_proxyIntrospectable = wpa_supplicantClient_proxyIntrospectable_Init( busName,
 			                                                                           objectPath);
 	if (!controller->m_proxyIntrospectable) {
-		printf("Failed to Initialize the Proxy Introspectable Object... Exiting\n");
+		ERROR("Failed to Initialize the Proxy Introspectable Object... Exiting");
 
 		goto FAIL_PROXY_INTROSPECTABLE;
 	}
@@ -63,19 +65,26 @@ wpa_supplicantClient_dbusController *wpa_supplicantClient_dbusController_Init (c
 
 FAIL_PROXY_INTROSPECTABLE:
 	wpa_supplicantClient_nameWatcher_Destroy(controller->m_nameWatcher);
+
 FAIL_NAME_WATCHER:
 	free(controller);
+
 FAIL_CONTROLLER:
+    EXIT_WITH_ERROR();
     return NULL;
 
 SUCCESS:
+	EXIT();
     return controller;
 }
 
 void wpa_supplicantClient_dbusController_Start (wpa_supplicantClient_dbusController *controller) {
 
+	ENTER();
+
 	if (!controller){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -86,13 +95,17 @@ void wpa_supplicantClient_dbusController_Start (wpa_supplicantClient_dbusControl
 	controller->m_loop = g_main_loop_new(NULL, FALSE);
     g_main_loop_run(controller->m_loop);
 
+    EXIT();
 	return;
 }
 
 void wpa_supplicantClient_dbusController_Stop (wpa_supplicantClient_dbusController *controller) {
 
+	ENTER();
+
 	if (!controller){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -106,13 +119,17 @@ void wpa_supplicantClient_dbusController_Stop (wpa_supplicantClient_dbusControll
 	//Stop the Name Watcher
 	wpa_supplicantClient_nameWatcher_Stop(controller->m_nameWatcher);
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_dbusController_Destroy (wpa_supplicantClient_dbusController *controller) {
 
+	ENTER();
+
 	if (!controller){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -127,6 +144,7 @@ void wpa_supplicantClient_dbusController_Destroy (wpa_supplicantClient_dbusContr
 	//Finally, we free the controller
 	free (controller);
 
+	EXIT();
 	return;
 }
 
@@ -134,6 +152,9 @@ void wpa_supplicantClient_dbusController_Destroy (wpa_supplicantClient_dbusContr
 //Set functions
 void wpa_supplicantClient_dbusController_SetDbgLvl (wpa_supplicantClient_dbusController *controller,
 		                                            ClientDbgLvl lvl) {
+
+	ENTER();
+
 	char dbgLvl [MAX_LEN_NAME];
 
 	switch (lvl) {
@@ -162,23 +183,29 @@ void wpa_supplicantClient_dbusController_SetDbgLvl (wpa_supplicantClient_dbusCon
 			                          "DebugLevel",
 									  g_variant_new ("s", dbgLvl));
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_dbusController_SetShowTS (wpa_supplicantClient_dbusController *controller, bool show) {
 
+	ENTER();
 	g_dbus_proxy_set_cached_property (controller->m_mainIfProxy,
 			                          "DebugTimestamp",
 								 	  g_variant_new ("b", show));
 
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_dbusController_SetShowKeys (wpa_supplicantClient_dbusController *controller, bool show) {
+
+	ENTER();
 	g_dbus_proxy_set_cached_property (controller->m_mainIfProxy,
 		 	                          "DebugShowKeys",
 									  g_variant_new ("b", show));
 
+	EXIT();
 	return;
 }
 
@@ -188,6 +215,8 @@ void wpa_supplicantClient_dbusController_SetShowKeys (wpa_supplicantClient_dbusC
 static void resumeStart (wpa_supplicantClient_dbusController *controller,
                          GDBusConnection *connection)
 {
+	ENTER();
+
 	GError * error = NULL;
 
 	//Inform the Parent
@@ -196,7 +225,8 @@ static void resumeStart (wpa_supplicantClient_dbusController *controller,
 	controller->m_objectProxy = g_dbus_object_proxy_new (connection,
 			                                             controller->m_objectPath);
 	if (!controller->m_objectProxy) {
-		printf ("Failed to create an object proxy for the Client \n");
+		ERROR("Failed to create an object proxy for the Client ");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -209,11 +239,13 @@ static void resumeStart (wpa_supplicantClient_dbusController *controller,
 												       NULL,
 												       &error);
 	if (!controller->m_mainIfProxy) {
-		printf("Can not create an interface proxy for the main interface \n");
-		printf("Error Message: %s \n", error->message);
-	} else {
-		printf("Created the proxy for the main interface successfully \n");
+		ERROR("Can not create an interface proxy for the main interface ");
+		ERROR("Error Message: %s ", error->message);
+		EXIT_WITH_ERROR();
+		return;
 	}
+
+	PROGRESS("Created the proxy for the main interface successfully ");
 
 	controller->m_ifIfProxy = g_dbus_proxy_new_sync (connection,
 			                                         G_DBUS_PROXY_FLAGS_NONE,
@@ -224,20 +256,27 @@ static void resumeStart (wpa_supplicantClient_dbusController *controller,
 												     NULL,
 												     &error);
 	if (!controller->m_ifIfProxy) {
-		printf("Can not create an interface proxy for the Interface interface \n");
-		printf("Error Message: %s \n", error->message);
-	} else {
-		printf("Created the proxy for the Interface interface successfully \n");
+		ERROR("Can not create an interface proxy for the Interface interface ");
+		ERROR("Error Message: %s ", error->message);
+
+		EXIT_WITH_ERROR();
+		return;
 	}
+	PROGRESS("Created the proxy for the Interface interface successfully ");
 
 	//Then Register for the signals
 	registerSignals(controller);
 
 	//Get the Properties
 	getProperties(controller);
+
+	EXIT();
+	return;
 }
 
 static void tempStop (wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
 	//Inform the Parent
 	controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_NOT_READY, NULL);
 
@@ -249,14 +288,17 @@ static void tempStop (wpa_supplicantClient_dbusController *controller) {
 	controller->m_ifIfProxy = NULL;
 
     controller->m_connection = NULL;
+
+    EXIT();
 }
 
 static void detectedNameUp(wpa_supplicantClient_dbusController *controller,
                            GDBusConnection *connection) {
-	printf ("Entering the detectedNameUp() \n");
+	ENTER();
 
 	if (controller->m_connection) {
-		printf("Something is wrong: Stored Connection should be NULL\n");
+		ERROR("Something is wrong: Stored Connection should be NULL");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -269,15 +311,17 @@ static void detectedNameUp(wpa_supplicantClient_dbusController *controller,
 	//Now we need to resume the start process
 	resumeStart(controller, connection);
 
+	EXIT();
 	return;
 }
 
 static void detectedNameDown(wpa_supplicantClient_dbusController *controller,
 		                     GDBusConnection *connection) {
-	printf ("Entering detectedNameDown() \n");
+	ENTER();
 
 	if ((!controller->m_connection)  || (controller->m_connection != connection)) {
-		printf("Something is wrong: Stored Connection should be the same as the received value\n");
+		ERROR("Something is wrong: Stored Connection should be the same as the received value");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -286,16 +330,20 @@ static void detectedNameDown(wpa_supplicantClient_dbusController *controller,
 	//Now we need to disable the Object and interface proxies
     tempStop(controller);
 
+    EXIT();
 	return;
 }
 
 static void OnNameWatchEventCb (void *parent,
 		                        NameWatcherEventType type,
-						 void *args) {
+								void *args) {
+	ENTER();
+
 	GDBusConnection *connection;
 
 	if (!parent) {
-		printf ("NULL pointer passed for parent....Exiting\n");
+		NULL_POINTER("parent");
+		EXIT_WITH_ERROR();
 		return;
 	}
 	wpa_supplicantClient_dbusController *controller = (wpa_supplicantClient_dbusController *)parent;
@@ -312,9 +360,10 @@ static void OnNameWatchEventCb (void *parent,
 		break;
 
 	default:
-		printf("Invalid Name Watch Event\n");
+		ERROR("Invalid Name Watch Event");
 	}
 
+	EXIT();
 	return;
 }
 
@@ -324,9 +373,9 @@ static void signalNotify (GDBusProxy *dbusIfProxy,
                           gchar *signal,
                           GVariant *parameter,
                           gpointer userData) {
-	printf("Entering Client signalNotify() :\n");
-	printf("------ Sender: %s\n", sender);
-	printf("------ Signal: %s\n", signal);
+	ENTER();
+	INFO("------ Sender: %s", sender);
+	INFO("------ Signal: %s", signal);
 
 	//First Get the controller
 	wpa_supplicantClient_dbusController *controller = (wpa_supplicantClient_dbusController *)userData;
@@ -337,10 +386,10 @@ static void signalNotify (GDBusProxy *dbusIfProxy,
 	    GVariant *v;
 	    gchar *str;
 
-		printf("Received InterfaceAdded Signal\n");
+		INFO("Received InterfaceAdded Signal");
 	    g_variant_get(parameter, "(oa{sv})", &str, &iter);
 
-	    printf("Added Interface : %s\n", str);
+	    PROGRESS("Interface Added : %s", str);
 
 	    /*Note that although the parameter includes a dictionary of the interface properties,
 	     * I am not going to parse it here....
@@ -352,25 +401,30 @@ static void signalNotify (GDBusProxy *dbusIfProxy,
 	} else if (!strcmp(signal, "InterfaceRemoved")) {
 	    gchar *str;
 
-	    printf("Received InterfaceRemoved Signal\n");
+	    INFO("Received InterfaceRemoved Signal");
 	    g_variant_get(parameter, "(o)", &str);
 
-	    printf("Removed Interface : %s\n", str);
+	    PROGRESS("Interface Removed : %s", str);
 
 	    //Call the call back function
         controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_REM_IF, (void *)str );
 
 	} else if (!strcmp(signal, "PropertiesChanged")) {
-		printf("Received PropertiesChanged Signal");
+		INFO("Received PropertiesChanged Signal");
 	} else if (!strcmp(signal, "NetworkRequest")) {
-		printf("Received NetworkRequest Signal");
+		INFO("Received NetworkRequest Signal");
 	} else {
-		printf("Received an Invalid Signal");
+		INFO("Received an Invalid Signal");
 	}
+
+	EXIT();
+	return;
 }
 
 
 static void getProp_dbgLvl(wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
     GVariant *v;
     ClientDbgLvl dbgLvl;
     gchar *str;
@@ -378,12 +432,13 @@ static void getProp_dbgLvl(wpa_supplicantClient_dbusController *controller) {
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "DebugLevel");
     if (!v) {
-    	printf("Failed to get the property for DebugLevel\n");
+    	ERROR("Failed to get the property for DebugLevel");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "s",&str);
-    printf("Debug Level Property is %s\n",str);
+    INFO("Debug Level Property is %s",str);
 
     if (!strcmp(str, "msgdump")) {
     	dbgLvl = CLIENT_DBG_LVL_VERBOSE;
@@ -396,53 +451,69 @@ static void getProp_dbgLvl(wpa_supplicantClient_dbusController *controller) {
     } else if (!strcmp(str, "erro")) {
     	dbgLvl = CLIENT_DBG_LVL_ERR;
     } else {
-    	printf("Received Invalid Debug Level: %s\n", str);
+    	ERROR("Received Invalid Debug Level: %s", str);
     }
 
     g_free(str);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_SET_DBG_LEVEL, (void *)dbgLvl );
+
+    EXIT();
+    return;
 }
 
 static void getProp_dbgShowTS(wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
 	GVariant *v;
     bool show;
 
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
 	  	                                  "DebugTimestamp");
     if (!v) {
-    	printf("Failed to get the property for DebugTimestamp\n");
+    	ERROR("Failed to get the property for DebugTimestamp");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "b", &show);
-    printf("DebugTimestamp Property is %d\n",(int)show);
+    INFO("DebugTimestamp Property is %d",(int)show);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_SET_SHOW_TS , (void *)show );
+
+    EXIT();
+    return;
 }
 
 static void getProp_dbgShowKeys(wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
 	GVariant *v;
     bool show;
 
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
 	  	                                  "DebugShowKeys");
     if (!v) {
-    	printf("Failed to get the property for DebugShowKeys\n");
+    	ERROR("Failed to get the property for DebugShowKeys");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "b", &show);
-    printf("DebugShowKeys Property is %d\n",(int)show);
+    INFO("DebugShowKeys Property is %d",(int)show);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_SET_SHOW_KEYS, (void *)show );
+
+    EXIT();
+    return;
 }
 
 
 static void getProp_eapMethods(wpa_supplicantClient_dbusController *controller) {
+	ENTER();
     GVariant *v;
     GVariantIter *iter;
     gchar *str;
@@ -451,13 +522,14 @@ static void getProp_eapMethods(wpa_supplicantClient_dbusController *controller) 
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "EapMethods");
     if (!v) {
-    	printf("Failed to get the property for EapMethods\n");
+    	ERROR("Failed to get the property for EapMethods");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "as", &iter);
     while (g_variant_iter_loop(iter, "s", &str)) {
-    	printf("EAP Method : %s\n", str);
+    	INFO("EAP Method : %s", str);
 
     	int i;
     	for (i = 1; i < (int)EAP_LAST ; i++) {
@@ -467,15 +539,20 @@ static void getProp_eapMethods(wpa_supplicantClient_dbusController *controller) 
     		}
     	}
     	if (i == (int)EAP_LAST) {
-    		printf("Found Invalid EAP Method: %s\n", str);
+    		ERROR("Found Invalid EAP Method: %s", str);
     	} else {
         	//Call the call back function
     		controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_ADD_EAP_METHOD, (void *)method );
     	}
     }
+
+    EXIT();
+    return;
 }
 
 static void getProp_interfaces (wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
     GVariant *v;
     GVariantIter *iter;
     gchar *str;
@@ -483,28 +560,39 @@ static void getProp_interfaces (wpa_supplicantClient_dbusController *controller)
     v = g_dbus_proxy_get_cached_property (controller->m_mainIfProxy,
   	                                      "Interfaces");
     if (!v) {
-    	printf("Failed to get the property for Interfaces\n");
+    	ERROR("Failed to get the property for Interfaces");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "ao", &iter);
     while (g_variant_iter_loop(iter, "o", &str)) {
-    	printf("Interface : %s\n", str);
+    	INFO("Interface : %s", str);
 
     	//Call the call back function
         controller->m_notifyCb(controller->m_parent, CLIENT_EVENT_TYPE_ADD_IF, (void *)str );
     }
+
+    EXIT();
+    return;
 }
 
 static void getProperties (wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
     getProp_dbgLvl(controller);
 	getProp_dbgShowTS(controller);
 	getProp_dbgShowKeys(controller);
 	getProp_eapMethods(controller);
 	getProp_interfaces(controller);
+
+	EXIT();
+	return;
 }
 
 static void registerSignals (wpa_supplicantClient_dbusController *controller) {
+	ENTER();
+
 	//Register for signals for the main interface
 	g_signal_connect (controller->m_mainIfProxy,
  			          "g-signal",
@@ -516,4 +604,7 @@ static void registerSignals (wpa_supplicantClient_dbusController *controller) {
 			          "g-signal",
 				      G_CALLBACK(signalNotify),
 				      (void *)controller);
+
+	EXIT();
+	return;
 }

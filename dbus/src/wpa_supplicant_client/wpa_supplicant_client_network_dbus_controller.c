@@ -19,9 +19,11 @@ wpa_supplicantClient_network_dbusController *wpa_supplicantClient_network_dbusCo
 																							   void *connection,
 																			                   void *notifyCb,
 		                                                                                       void *parent) {
+	ENTER();
+
 	wpa_supplicantClient_network_dbusController *controller = malloc(sizeof(wpa_supplicantClient_network_dbusController));
     if (!controller) {
-    	printf("Failed to allocate the Network D-Bus Object ... Exiting\n");
+    	ALLOC_FAIL("controller");
     	goto FAIL_CONTROLLER;
     }
 	memset (controller, 0, sizeof(wpa_supplicantClient_network_dbusController));
@@ -39,7 +41,7 @@ wpa_supplicantClient_network_dbusController *wpa_supplicantClient_network_dbusCo
 	controller->m_proxyIntrospectable = wpa_supplicantClient_proxyIntrospectable_Init( busName,
 			                                                                           objectPath);
 	if (!controller->m_proxyIntrospectable) {
-		printf("Failed to Initialize the Proxy Introspectable for Network Object... Exiting\n");
+		ERROR("Failed to Initialize the Proxy Introspectable for Network Object... Exiting");
 
 		goto FAIL_PROXY_INTROSPECTABLE;
 	}
@@ -49,18 +51,24 @@ wpa_supplicantClient_network_dbusController *wpa_supplicantClient_network_dbusCo
 
 FAIL_PROXY_INTROSPECTABLE:
 	free(controller);
+
 FAIL_CONTROLLER:
+	EXIT_WITH_ERROR();
     return NULL;
 
 SUCCESS:
+	EXIT();
     return controller;
 }
 
 void wpa_supplicantClient_network_dbusController_Start (wpa_supplicantClient_network_dbusController *controller) {
+	ENTER();
+
 	GError * error = NULL;
 
 	if (!controller){
-		printf("Passing NULL for Controller to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -72,7 +80,8 @@ void wpa_supplicantClient_network_dbusController_Start (wpa_supplicantClient_net
 	controller->m_objectProxy = g_dbus_object_proxy_new (controller->m_connection,
 			                                             controller->m_objectPath);
 	if (!controller->m_objectProxy) {
-		printf ("Failed to create an object proxy for the Network \n");
+		ERROR("Failed to create an object proxy for the Network");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -85,10 +94,13 @@ void wpa_supplicantClient_network_dbusController_Start (wpa_supplicantClient_net
 												  NULL,
 												  &error);
 	if (!controller->m_ifProxy) {
-		printf("Can not create an interface proxy for the Network \n");
-		printf("Error Message: %s \n", error->message);
+		ERROR("Can not create an interface proxy for the Network");
+		ERROR("Error Message: %s", error->message);
+
+		EXIT_WITH_ERROR();
+		return;
 	} else {
-		printf("Created the interface proxy for the Network interface successfully \n");
+		PROGRESS("Created the interface proxy for the Network interface successfully ");
 	}
 
 	//Register for Signals
@@ -97,13 +109,17 @@ void wpa_supplicantClient_network_dbusController_Start (wpa_supplicantClient_net
 	//Collect Property values
     getProperties(controller);
 
+    EXIT();
 	return;
 }
 
 void wpa_supplicantClient_network_dbusController_Stop (wpa_supplicantClient_network_dbusController *controller) {
 
+	ENTER();
+
 	if (!controller){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -117,13 +133,18 @@ void wpa_supplicantClient_network_dbusController_Stop (wpa_supplicantClient_netw
 	//Stop the Proxy Introspectable
 	wpa_supplicantClient_proxyIntrospectable_Stop(controller->m_proxyIntrospectable);
 
-
+	EXIT();
 	return;
 }
 
 void wpa_supplicantClient_network_dbusController_Destroy (wpa_supplicantClient_network_dbusController *controller) {
+
+	ENTER();
+
 	if (!controller){
-		printf("Passing NULL to the function ...Exiting\n");
+		NULL_POINTER("controller");
+
+		EXIT_WITH_ERROR();
 		return;
 	}
 
@@ -133,16 +154,20 @@ void wpa_supplicantClient_network_dbusController_Destroy (wpa_supplicantClient_n
 	//Finally, we free the controller
 	free (controller);
 
+	EXIT();
 	return;
 }
 
 
 void wpa_supplicantClient_network_dbusController_SetEnabled (wpa_supplicantClient_network_dbusController *controller,
 		                                                     bool enabled) {
+	ENTER();
+
 	g_dbus_proxy_set_cached_property (controller->m_ifProxy,
 				                      "Enabled",
 									   g_variant_new ("b", enabled));
 
+	EXIT();
 	return;
 }
 
@@ -156,39 +181,45 @@ static void signalNotify (GDBusProxy *dbusIfProxy,
                           gchar *signal,
                           GVariant *parameter,
                           gpointer userData) {
-	printf("Entering Network signalNotify() :\n");
-	printf("------ Sender: %s\n", sender);
-	printf("------ Signal: %s\n", signal);
+	ENTER();
+	INFO("------ Sender: %s", sender);
+	INFO("------ Signal: %s", signal);
 
 	//First Get the Controller pointer
 	wpa_supplicantClient_network_dbusController *controller = (wpa_supplicantClient_network_dbusController *)userData;
 
-	printf("Received an Invalid/UnSupported Signal");
+	ERROR("Received an Invalid/UnSupported Signal");
+	EXIT_WITH_ERROR();
 }
 
 static void register4Signals(wpa_supplicantClient_network_dbusController *controller) {
+    ENTER();
 
     g_signal_connect (controller->m_ifProxy,
     			      "g-signal",
     				  G_CALLBACK(signalNotify),
     				  (void *)controller);
 
+    EXIT();
     return;
 }
 
 static void getProp_enabled(wpa_supplicantClient_network_dbusController *controller) {
+	ENTER();
+
 	GVariant *v;
     bool isEnabled;
 
     v = g_dbus_proxy_get_cached_property (controller->m_ifProxy,
 	  	                                  "Enabled");
     if (!v) {
-    	printf("Failed to get the property for Enabled\n");
+    	ERROR("Failed to get the property for Enabled");
+    	EXIT_WITH_ERROR();
     	return;
     }
 
     g_variant_get(v, "b", &isEnabled);
-    printf("Enabled Property is %d\n",(int)isEnabled);
+    INFO("Enabled Property is %d",(int)isEnabled);
 
     //Call the call back function
     controller->m_notifyCb(controller->m_parent, NETWORK_EVENT_TYPE_SET_ENABLED, (void *)isEnabled);
@@ -196,8 +227,16 @@ static void getProp_enabled(wpa_supplicantClient_network_dbusController *control
 
     //Cleanup
     g_variant_unref(v);
+
+    EXIT();
+    return;
 }
 
 static void getProperties(wpa_supplicantClient_network_dbusController *controller) {
+	ENTER();
+
 	getProp_enabled(controller);
+
+	EXIT();
+	return;
 }

@@ -22,7 +22,8 @@ LIBS= -lgio-2.0 -lglib-2.0 -lgobject-2.0
 DEP=
 
 BIN_NAME=wpa_supplicant_client
-SRC= main.c                  \
+SRC= logger.c                \
+     main.c                  \
 	 wpa_supplicant_client.c \
      wpa_supplicant_client_dbus_controller.c  \
      wpa_supplicant_client_proxy_introspectable.c  \

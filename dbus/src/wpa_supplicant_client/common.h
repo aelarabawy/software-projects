@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "logger.h"
 #include <gio/gio.h>
 
 #define SYNC_API 1
