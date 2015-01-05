@@ -1,0 +1,13 @@
+rm -f ../build/*.o *~ core ../include/*~ ./gy86-cli
+cd mpu60x0 ; make clean
+make[1]: Entering directory `/home/aelarabawy/work/projects/gy-86/src/mpu60x0'
+rm -f ../../build/*.o *~ core ../../include/*~ ./libmpu60x0.a
+make[1]: Leaving directory `/home/aelarabawy/work/projects/gy-86/src/mpu60x0'
+cd hmc5883 ; make clean
+make[1]: Entering directory `/home/aelarabawy/work/projects/gy-86/src/hmc5883'
+rm -f ../../build/*.o *~ core ../../include/*~ ./libhmc5883.a
+make[1]: Leaving directory `/home/aelarabawy/work/projects/gy-86/src/hmc5883'
+cd ms5611  ; make clean 
+make[1]: Entering directory `/home/aelarabawy/work/projects/gy-86/src/ms5611'
+rm -f ../../build/*.o *~ core ../../include/*~ ./libms5611.a
+make[1]: Leaving directory `/home/aelarabawy/work/projects/gy-86/src/ms5611'

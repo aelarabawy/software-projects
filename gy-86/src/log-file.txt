@@ -1,0 +1,15 @@
+Jan  4 2015 | 09:54:09 | ENTER | main.c(44): Entering Function: main()
+Jan  4 2015 | 09:54:09 | PROG  | main.c(46): ENTERING THE MAIN FOR gy86-cli application 
+Jan  4 2015 | 09:54:09 | ENTER |  main.c(260): Entering Function: handle_gy86_get()
+Jan  4 2015 | 09:54:09 | PROG  |  main.c(262): Handling gy86-get Command  
+Jan  4 2015 | 09:54:09 | ENTER |   main.c(82): Entering Function: getChipType()
+Jan  4 2015 | 09:54:09 | ERROR |   main.c(99): Invalid Chip mpu 
+Jan  4 2015 | 09:54:09 | EXIT  |   main.c(107): Exiting Function: getChipType()
+Jan  4 2015 | 09:54:09 | ERROR |  main.c(267): Invalid Chip Name ... Exiting 
+Jan  4 2015 | 09:54:09 | EXIT  |  main.c(318): Exiting Function: handle_gy86_get()
+Jan  4 2015 | 09:54:09 | ENTER |  main.c(260): Entering Function: handle_gy86_get()
+Jan  4 2015 | 09:54:09 | PROG  |  main.c(262): Handling gy86-get Command  
+Jan  4 2015 | 09:54:09 | ENTER |   main.c(82): Entering Function: getChipType()
+Jan  4 2015 | 09:54:09 | EXIT  |   main.c(107): Exiting Function: getChipType()
+Jan  4 2015 | 09:54:09 | INFO  |  main.c(274): Config Name is BEGINabcEND 
+Jan  4 2015 | 09:54:09 | EXIT  |  main.c(318): Exiting Function: handle_gy86_get()
