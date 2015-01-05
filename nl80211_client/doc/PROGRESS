@@ -16,21 +16,3 @@
      To learn about owning names or watching name check the file :
      To learn about building a Object manager server check the file: gdbus_example_objectmanager-servr.c
 # 6. Keep in mind that if you try to run the program from an ssh session, it will not succeed. It has to use ssh -X for the application to be able to connect to the dbus
-
-# As of Dec 10, 2014
-# Code is checked in which builds successfully, I will need to,
-# 1. Add a Logger, and add logs throughout the code
-# 2. Cleanup is not done consistently 
-# 3. Some properties and signals are not supported yet, will need to itemize them for future support
-# 4. All methods are not supported yet (will need to add control API to use them)
-# 5. Walkthrough 
-# 6. Test
-# 7. Some interfaces are not supported yet (WPS and P2P)
-# 8. Need to separate into a dbus driver library and an application/library
-# 9. Naming consistency needs to be reviewed, and dictionary updated
-
-# Extensions to the project:
-# 1. Use the native dbus library API instead of the glib Binding
-# 2. Build a web interface for the application
-# 3. Run on the RPi and make sure it is portable on it
-

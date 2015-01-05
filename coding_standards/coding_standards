@@ -1,0 +1,18 @@
+Coding Standards
+================
+
+This document describes the coding standards that I should be following
+
+1. file names should be all small letters, and use separation with underscore
+   examples:  my_file.h   this_is_another_file.c
+
+2. function names should be small letters and preceeeded by the the object name followed by an underscore
+   examples: myObjectName_functionName    
+
+3. In function definitions, and fuction declarations, we should have a space between the function name and the ()
+   examples: myObjectName_function ()
+
+4. In funtion usage, don't use space between funtion name and ()
+   examples: myObjectName_funtion();
+
+5. In header files, in function prototypes, don't use variable names, just put types
