@@ -94,6 +94,7 @@ retcode ms5611_SetTempOsr (msHandle, Ms5611_Osr);
 Ms5611_Osr ms5611_GetTempOsr (msHandle);
 
 retcode ms5611_ConvertOsr2String(Ms5611_Osr, char **);
+Ms5611_Osr ms5611_ParseOsr(char *);
 
 
 /**

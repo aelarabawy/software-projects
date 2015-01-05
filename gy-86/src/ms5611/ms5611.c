@@ -521,6 +521,30 @@ END:
 	return retVal;
 }
 
+Ms5611_Osr ms5611_ParseOsr(char *osrStr) {
+	ENTER();
+	Ms5611_Osr osr;
+
+	if (strcmp(osrStr, "256") == 0) {
+		osr = OSR_256;
+	} else if (strcmp(osrStr, "512") == 0) {
+		osr = OSR_512;
+	} else if (strcmp(osrStr, "1024") == 0) {
+		osr = OSR_1024;
+	} else if (strcmp(osrStr, "2048") == 0) {
+		osr = OSR_2048;
+	} else if (strcmp(osrStr, "4096") == 0) {
+		osr = OSR_4096;
+	} else {
+		ERROR("Invalid value for OSR %s", osrStr);
+		osr = OSR_INVALID;
+	}
+
+END:
+	EXIT();
+	return osr;
+}
+
 
 /**
  * Perform a Pressure/Temperature Measurement

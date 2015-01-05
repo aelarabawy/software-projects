@@ -63,7 +63,7 @@ retcode mpu60x0_Reset (mpuHandle, const Mpu60x0_ResetMode);
 /**
  * This function parses a string and returns the Corresponding Reset Mode
  */
-Mpu60x0_ResetMode mpu60x0_parseResetMode (char*);
+Mpu60x0_ResetMode mpu60x0_ParseResetMode (char*);
 
 /**
  * This function will Update the chip configuration to the HW Register

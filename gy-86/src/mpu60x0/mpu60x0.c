@@ -1268,7 +1268,7 @@ END:
 }
 
 
-Mpu60x0_ResetMode mpu60x0_parseResetMode (char* modeStr) {
+Mpu60x0_ResetMode mpu60x0_ParseResetMode (char* modeStr) {
 	ENTER();
 
 	Mpu60x0_ResetMode mode;
