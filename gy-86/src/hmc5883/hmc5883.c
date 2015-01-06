@@ -364,6 +364,50 @@ END:
 	return speed;
 }
 
+retcode hmc5883_ConvertI2cSpeed2String(Hmc5883_I2cBusSpeed speed, char **pSpeedStr) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (speed) {
+	case I2C_BUS_SPEED_STD:
+		strcpy(*pSpeedStr = "Standard Clk Speed");
+		break;
+
+	case I2C_BUS_SPEED_HIGH:
+		strcpy(*pSpeedStr = "High Clk Speed");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Hmc5883_I2cBusSpeed hmc5883_ParseBusSpeed(char *speedStr) {
+	ENTER();
+	Hmc5883_I2cBusSpeed speed;
+
+	if (strcmp(speedStr, "high") == 0) {
+		speed = I2C_BUS_SPEED_HIGH;
+	} else if (strcmp(speedStr, "std") == 0) {
+		speed = I2C_BUS_SPEED_STD;
+	} else {
+		ERROR("Invalid value for Bus Speed %s", speedStr);
+		speed = I2C_BUS_SPEED_INVALID;
+	}
+
+END:
+	EXIT();
+	return speed;
+}
+
+
 retcode hmc5883_SetOperMode (hmcHandle handle,
 		                     Hmc5883_OperMode mode) {
 	ENTER();
@@ -426,6 +470,57 @@ END:
 	EXIT();
 	return mode;
 }
+
+retcode hmc5883_ConvertOperMode2String(Hmc5883_OperMode mode, char **pMode) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (mode) {
+	case OPER_MODE_IDLE:
+		strcpy(*pMode = "IDLE Mode");
+		break;
+
+	case OPER_MODE_SINGLE:
+		strcpy(*pMode = "Single Measurement Mode");
+		break;
+
+	case OPER_MODE_CONT:
+		strcpy(*pMode = "Continuous Measurement Mode");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+
+Hmc5883_OperMode hmc5883_ParseOperMode(char *modeStr) {
+	ENTER();
+	Hmc5883_OperMode mode;
+
+	if (strcmp(modeStr, "idle") == 0) {
+		mode = OPER_MODE_IDLE;
+	} else if (strcmp(modeStr, "single") == 0) {
+		mode = OPER_MODE_SINGLE;
+	} else if (strcmp(modeStr, "cont") == 0) {
+		mode = OPER_MODE_CONT;
+	} else {
+		ERROR("Invalid value for Bus Speed %s", modeStr);
+		mode = OPER_MODE_INVALID;
+	}
+
+END:
+	EXIT();
+	return mode;
+}
+
 
 retcode hmc5883_SetDataOutRate (hmcHandle handle,
 		                        Hmc5883_DataOutRate rate) {
@@ -494,6 +589,75 @@ END:
 	return rate;
 }
 
+retcode hmc5883_ConvertDataRate2String(Hmc5883_DataOutRate rate, char **pRate) {
+
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (rate) {
+	case DATA_OUT_RATE_0_75:
+		strcpy(*pRate = "0.75 Hz");
+		break;
+	case DATA_OUT_RATE_1_5:
+		strcpy(*pRate = "1.5 Hz");
+		break;
+	case DATA_OUT_RATE_3:
+		strcpy(*pRate = "3 Hz");
+		break;
+	case DATA_OUT_RATE_7_5:
+		strcpy(*pRate = "7.5 Hz");
+		break;
+	case DATA_OUT_RATE_15:
+		strcpy(*pRate = "15 Hz");
+		break;
+	case DATA_OUT_RATE_30:
+		strcpy(*pRate = "30 Hz");
+		break;
+	case DATA_OUT_RATE_75:
+		strcpy(*pRate = "75 Hz");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Hmc5883_DataOutRate hmc5883_ParseDataRate (char *rateStr) {
+	ENTER();
+	Hmc5883_DataOutRate rate;
+
+	if (strcmp(rateStr, "0.75") == 0) {
+		rate = DATA_OUT_RATE_0_75;
+	} else if (strcmp(rateStr, "1.5") == 0) {
+		rate = DATA_OUT_RATE_1_5;
+	} else if (strcmp(rateStr, "3") == 0) {
+		rate = DATA_OUT_RATE_3;
+	} else if (strcmp(rateStr, "7.5") == 0) {
+		rate = DATA_OUT_RATE_7_5;
+	} else if (strcmp(rateStr, "15") == 0) {
+		rate = DATA_OUT_RATE_15;
+	} else if (strcmp(rateStr, "30") == 0) {
+		rate = DATA_OUT_RATE_30;
+	} else if (strcmp(rateStr, "75") == 0) {
+		rate = DATA_OUT_RATE_75;
+	} else {
+		ERROR("Invalid Data Rate %s", rateStr);
+		rate = DATA_OUT_RATE_INVALID;
+	}
+
+END:
+	EXIT();
+	return rate;
+}
+
+
 retcode hmc5883_SetOverSmplRatio (hmcHandle handle,
 		                          Hmc5883_OverSmplRatio ratio) {
 	ENTER();
@@ -558,6 +722,61 @@ END:
 	return ratio;
 }
 
+retcode hmc5883_ConvertOsr2String(Hmc5883_OverSmplRatio osr, char **pOsr) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (osr) {
+	case OVER_SMPL_RATIO_1:
+		strcpy(*pOsr = "1");
+		break;
+	case OVER_SMPL_RATIO_2:
+		strcpy(*pOsr = "2");
+		break;
+	case OVER_SMPL_RATIO_4:
+		strcpy(*pOsr = "4");
+		break;
+	case OVER_SMPL_RATIO_8:
+		strcpy(*pOsr = "8");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Hmc5883_OverSmplRatio hmc5883_ParseOsr (char *osrStr) {
+
+	ENTER();
+
+	Hmc5883_OverSmplRatio osr;
+
+	if (strcmp(osrStr, "1") == 0) {
+		osr = OVER_SMPL_RATIO_1;
+	} else if (strcmp(osrStr, "2") == 0) {
+		osr = OVER_SMPL_RATIO_2;
+	} else if (strcmp(osrStr, "4") == 0) {
+		osr = OVER_SMPL_RATIO_4;
+	} else if (strcmp(osrStr, "8") == 0) {
+		osr = OVER_SMPL_RATIO_8;
+	} else {
+		ERROR("Invalid Over Sampling Ratio %s", osrStr);
+		osr = OVER_SMPL_RATIO_INVALID;
+	}
+
+END:
+	EXIT();
+	return osr;
+}
+
+
 retcode hmc5883_SetMeasureMode (hmcHandle handle,
 		                        Hmc5883_MeasureMode mode) {
 	ENTER();
@@ -621,6 +840,57 @@ END:
 	EXIT();
 	return mode;
 }
+
+retcode hmc5883_ConvertMeasureMode2String(Hmc5883_MeasureMode mode, char **pMode) {
+
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (mode) {
+	case MEASURE_MODE_NORMAL:
+		strcpy(*pMode = "Normal Mode");
+		break;
+	case MEASURE_MODE_POS_BIAS:
+		strcpy(*pMode = "Self Test with Positive Bias");
+		break;
+	case MEASURE_MODE_NEG_BIAS:
+		strcpy(*pMode = "Self Test with Negative Bias");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Hmc5883_MeasureMode hmc5883_ParseMeasureMode (char *modeStr) {
+
+	ENTER();
+
+	Hmc5883_MeasureMode mode;
+
+	if (strcmp(modeStr, "normal") == 0) {
+		mode = MEASURE_MODE_NORMAL;
+	} else if (strcmp(modeStr, "pos") == 0) {
+		mode = MEASURE_MODE_POS_BIAS;
+	} else if (strcmp(modeStr, "neg") == 0) {
+		mode = MEASURE_MODE_NEG_BIAS;
+	} else {
+		ERROR("Invalid Measure Mode %s", modeStr);
+		mode = MEASURE_MODE_INVALID;
+	}
+
+END:
+	EXIT();
+	return mode;
+}
+
 
 retcode hmc5883_SetMeasureGain (hmcHandle handle,
 		                        Hmc5883_MeasureGain gain) {
@@ -691,6 +961,79 @@ END:
 	return gain;
 }
 
+retcode hmc5883_ConvertMeasureGain2String(Hmc5883_MeasureGain gain, char **pGainStr) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (gain) {
+	case MEASURE_GAIN_1370:
+		strcpy(*pGainStr, "1370");
+		break;
+	case MEASURE_GAIN_1090:
+		strcpy(*pGainStr, "1090");
+		break;
+	case MEASURE_GAIN_820:
+		strcpy(*pGainStr = "820");
+		break;
+	case MEASURE_GAIN_660:
+		strcpy(*pGainStr = "660");
+		break;
+	case MEASURE_GAIN_440:
+		strcpy(*pGainStr = "440");
+		break;
+	case MEASURE_GAIN_390:
+		strcpy(*pGainStr = "390");
+		break;
+	case MEASURE_GAIN_330:
+		strcpy(*pGainStr = "330");
+		break;
+	case MEASURE_GAIN_230:
+		strcpy(*pGainStr = "230");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Hmc5883_MeasureGain hmc5883_ParseMeasureGain (char *gainStr) {
+
+	ENTER();
+
+	Hmc5883_MeasureGain gain;
+
+	if (strcmp(gainStr, "1370") == 0) {
+		gain = MEASURE_GAIN_1370;
+	} else if (strcmp(gainStr, "1090") == 0) {
+		gain = MEASURE_GAIN_1090;
+	} else if (strcmp(gainStr, "820") == 0) {
+		gain = MEASURE_GAIN_820;
+	} else if (strcmp(gainStr, "660") == 0) {
+		gain = MEASURE_GAIN_660;
+	} else if (strcmp(gainStr, "440") == 0) {
+		gain = MEASURE_GAIN_440;
+	} else if (strcmp(gainStr, "390") == 0) {
+		gain = MEASURE_GAIN_390;
+	} else if (strcmp(gainStr, "330") == 0) {
+		gain = MEASURE_GAIN_330;
+	} else if (strcmp(gainStr, "230") == 0) {
+		gain = MEASURE_GAIN_230;
+	} else {
+		ERROR("Invalid Measure Gain %s", gainStr);
+		gain = MEASURE_GAIN_INVALID;
+	}
+
+END:
+	EXIT();
+	return gain;
+}
 
 
 /**
