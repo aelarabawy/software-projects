@@ -371,11 +371,11 @@ retcode hmc5883_ConvertI2cSpeed2String(Hmc5883_I2cBusSpeed speed, char **pSpeedS
 
 	switch (speed) {
 	case I2C_BUS_SPEED_STD:
-		strcpy(*pSpeedStr = "Standard Clk Speed");
+		strcpy(*pSpeedStr,"Standard Clk Speed");
 		break;
 
 	case I2C_BUS_SPEED_HIGH:
-		strcpy(*pSpeedStr = "High Clk Speed");
+		strcpy(*pSpeedStr,"High Clk Speed");
 		break;
 
 	default:
@@ -400,6 +400,7 @@ Hmc5883_I2cBusSpeed hmc5883_ParseBusSpeed(char *speedStr) {
 	} else {
 		ERROR("Invalid value for Bus Speed %s", speedStr);
 		speed = I2C_BUS_SPEED_INVALID;
+		goto END;
 	}
 
 END:
@@ -478,15 +479,15 @@ retcode hmc5883_ConvertOperMode2String(Hmc5883_OperMode mode, char **pMode) {
 
 	switch (mode) {
 	case OPER_MODE_IDLE:
-		strcpy(*pMode = "IDLE Mode");
+		strcpy(*pMode, "IDLE Mode");
 		break;
 
 	case OPER_MODE_SINGLE:
-		strcpy(*pMode = "Single Measurement Mode");
+		strcpy(*pMode, "Single Measurement Mode");
 		break;
 
 	case OPER_MODE_CONT:
-		strcpy(*pMode = "Continuous Measurement Mode");
+		strcpy(*pMode, "Continuous Measurement Mode");
 		break;
 
 	default:
@@ -514,6 +515,7 @@ Hmc5883_OperMode hmc5883_ParseOperMode(char *modeStr) {
 	} else {
 		ERROR("Invalid value for Bus Speed %s", modeStr);
 		mode = OPER_MODE_INVALID;
+		goto END;
 	}
 
 END:
@@ -597,25 +599,25 @@ retcode hmc5883_ConvertDataRate2String(Hmc5883_DataOutRate rate, char **pRate) {
 
 	switch (rate) {
 	case DATA_OUT_RATE_0_75:
-		strcpy(*pRate = "0.75 Hz");
+		strcpy(*pRate, "0.75 Hz");
 		break;
 	case DATA_OUT_RATE_1_5:
-		strcpy(*pRate = "1.5 Hz");
+		strcpy(*pRate, "1.5 Hz");
 		break;
 	case DATA_OUT_RATE_3:
-		strcpy(*pRate = "3 Hz");
+		strcpy(*pRate, "3 Hz");
 		break;
 	case DATA_OUT_RATE_7_5:
-		strcpy(*pRate = "7.5 Hz");
+		strcpy(*pRate, "7.5 Hz");
 		break;
 	case DATA_OUT_RATE_15:
-		strcpy(*pRate = "15 Hz");
+		strcpy(*pRate, "15 Hz");
 		break;
 	case DATA_OUT_RATE_30:
-		strcpy(*pRate = "30 Hz");
+		strcpy(*pRate, "30 Hz");
 		break;
 	case DATA_OUT_RATE_75:
-		strcpy(*pRate = "75 Hz");
+		strcpy(*pRate, "75 Hz");
 		break;
 
 	default:
@@ -650,6 +652,7 @@ Hmc5883_DataOutRate hmc5883_ParseDataRate (char *rateStr) {
 	} else {
 		ERROR("Invalid Data Rate %s", rateStr);
 		rate = DATA_OUT_RATE_INVALID;
+		goto END;
 	}
 
 END:
@@ -729,16 +732,16 @@ retcode hmc5883_ConvertOsr2String(Hmc5883_OverSmplRatio osr, char **pOsr) {
 
 	switch (osr) {
 	case OVER_SMPL_RATIO_1:
-		strcpy(*pOsr = "1");
+		strcpy(*pOsr, "1");
 		break;
 	case OVER_SMPL_RATIO_2:
-		strcpy(*pOsr = "2");
+		strcpy(*pOsr, "2");
 		break;
 	case OVER_SMPL_RATIO_4:
-		strcpy(*pOsr = "4");
+		strcpy(*pOsr, "4");
 		break;
 	case OVER_SMPL_RATIO_8:
-		strcpy(*pOsr = "8");
+		strcpy(*pOsr, "8");
 		break;
 
 	default:
@@ -769,6 +772,7 @@ Hmc5883_OverSmplRatio hmc5883_ParseOsr (char *osrStr) {
 	} else {
 		ERROR("Invalid Over Sampling Ratio %s", osrStr);
 		osr = OVER_SMPL_RATIO_INVALID;
+		goto END;
 	}
 
 END:
@@ -849,13 +853,13 @@ retcode hmc5883_ConvertMeasureMode2String(Hmc5883_MeasureMode mode, char **pMode
 
 	switch (mode) {
 	case MEASURE_MODE_NORMAL:
-		strcpy(*pMode = "Normal Mode");
+		strcpy(*pMode, "Normal Mode");
 		break;
 	case MEASURE_MODE_POS_BIAS:
-		strcpy(*pMode = "Self Test with Positive Bias");
+		strcpy(*pMode, "Self Test with Positive Bias");
 		break;
 	case MEASURE_MODE_NEG_BIAS:
-		strcpy(*pMode = "Self Test with Negative Bias");
+		strcpy(*pMode, "Self Test with Negative Bias");
 		break;
 
 	default:
@@ -884,6 +888,7 @@ Hmc5883_MeasureMode hmc5883_ParseMeasureMode (char *modeStr) {
 	} else {
 		ERROR("Invalid Measure Mode %s", modeStr);
 		mode = MEASURE_MODE_INVALID;
+		goto END;
 	}
 
 END:
@@ -974,22 +979,22 @@ retcode hmc5883_ConvertMeasureGain2String(Hmc5883_MeasureGain gain, char **pGain
 		strcpy(*pGainStr, "1090");
 		break;
 	case MEASURE_GAIN_820:
-		strcpy(*pGainStr = "820");
+		strcpy(*pGainStr, "820");
 		break;
 	case MEASURE_GAIN_660:
-		strcpy(*pGainStr = "660");
+		strcpy(*pGainStr, "660");
 		break;
 	case MEASURE_GAIN_440:
-		strcpy(*pGainStr = "440");
+		strcpy(*pGainStr, "440");
 		break;
 	case MEASURE_GAIN_390:
-		strcpy(*pGainStr = "390");
+		strcpy(*pGainStr, "390");
 		break;
 	case MEASURE_GAIN_330:
-		strcpy(*pGainStr = "330");
+		strcpy(*pGainStr, "330");
 		break;
 	case MEASURE_GAIN_230:
-		strcpy(*pGainStr = "230");
+		strcpy(*pGainStr, "230");
 		break;
 
 	default:
@@ -1028,6 +1033,7 @@ Hmc5883_MeasureGain hmc5883_ParseMeasureGain (char *gainStr) {
 	} else {
 		ERROR("Invalid Measure Gain %s", gainStr);
 		gain = MEASURE_GAIN_INVALID;
+		goto END;
 	}
 
 END:

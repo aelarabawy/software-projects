@@ -254,6 +254,12 @@ retcode ms5611_SetI2cAddr (msHandle handle,
 	case I2C_ADDR_CSB_HIGH:
 		ms5611->m_i2cAddr = MS5611_I2C_ADDRESS_CSB_HIGH;
 		break;
+
+	default:
+		ERROR("Invalid I2C Address");
+		retVal = -1;
+		goto END;
+		break;
 	}
 
 END:
@@ -509,7 +515,7 @@ retcode ms5611_ConvertOsr2String(Ms5611_Osr osr, char ** pOsrStr) {
 
 	default:
 		strcpy(*pOsrStr, "Invalid OSR Value");
-		retVal = -a;
+		retVal = -1;
 		goto END;
 		break;
 
@@ -538,6 +544,7 @@ Ms5611_Osr ms5611_ParseOsr(char *osrStr) {
 	} else {
 		ERROR("Invalid value for OSR %s", osrStr);
 		osr = OSR_INVALID;
+		goto END;
 	}
 
 END:

@@ -411,7 +411,7 @@ static retcode handle_set_i2c_addr (char *addrStr) {
 		goto END;
 	} else {
 		addr = ms5611_ParseI2cAddr(addrStr);
-		if (addr == I2C_ADDR_INVALID) {
+		if (addr == I2C_ADDR_CSB_INVALID) {
 			ERROR("Invalid Address %s", addrStr);
 			PRINT_CLI("ERROR: Invalid Address %s", addrStr);
 			retVal = -1;

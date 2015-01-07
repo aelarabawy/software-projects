@@ -58,23 +58,23 @@ static retcode handle_get_int_clear_on_read (ConfigDataSrc);
 static retcode handle_get_aux_i2c_mode (ConfigDataSrc);
 static retcode handle_get_aux_i2c_clk (ConfigDataSrc);
 
-retcode (*mpuGetHandlers[])(void) = { handle_get_i2c_addr,
-		                              handle_get_clk_src,
-								      handle_get_smpl_rate,
-								      handle_get_lpf,
-								      handle_get_acc_fsr,
-								      handle_get_gyro_fsr,
-									  handle_get_fifo_enable,
-									  handle_get_mot_det_thr,
-									  handle_get_acc_enable,
-									  handle_get_gyro_enable,
-									  handle_get_temp_enable,
-									  handle_get_int_lvl,
-									  handle_get_int_open,
-									  handle_get_int_latch,
-									  handle_get_int_clear_on_read,
-									  handle_get_aux_i2c_mode,
-									  handle_get_aux_i2c_clk};
+retcode (*mpuGetHandlers[])(ConfigDataSrc) = { handle_get_i2c_addr,
+											   handle_get_clk_src,
+											   handle_get_smpl_rate,
+											   handle_get_lpf,
+											   handle_get_acc_fsr,
+											   handle_get_gyro_fsr,
+											   handle_get_fifo_enable,
+											   handle_get_mot_det_thr,
+											   handle_get_acc_enable,
+											   handle_get_gyro_enable,
+											   handle_get_temp_enable,
+											   handle_get_int_lvl,
+											   handle_get_int_open,
+											   handle_get_int_latch,
+											   handle_get_int_clear_on_read,
+										 	   handle_get_aux_i2c_mode,
+											   handle_get_aux_i2c_clk};
 
 /**
  * Set functions prototypes
@@ -325,23 +325,17 @@ static retcode handle_get_i2c_addr (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
-	char addrStr [100];
+	//Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_I2cAddr addr;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		addr = mpu60x0_GetI2cAddr(gy->m_mpu);
-		retVal = hmc5883_ConvertI2cSpeed2String(clk, &clkStr);
-		if (retVal) {
-			ERROR("Failed to convert %d into an CLK Value", clk);
-			PRINT_CLI("ERROR: Failed to convert %d into an CLK Value", clk);
-			goto END;
-		}
+		addr = mpu60x0_GetI2cAddr(mpu);
 
 		INFO("I2C Addr = 0x%x",addr);
 		PRINT_CLI("I2C Addr = 0x%x",addr);

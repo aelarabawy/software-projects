@@ -172,7 +172,7 @@ static retcode handle_gy86_start(void) {
 		goto END;
 	}
 
-	retcode retVal = gy86_Start(g_gyHandle, chip);
+	retVal = gy86_Start(g_gyHandle, chip);
 	if (retVal) {
 		ERROR("Failed to Start the GY-86 Module chips");
 		goto END;
@@ -243,7 +243,7 @@ static retcode handle_gy86_update(void) {
 		goto END;
 	}
 
-	retcode retVal = gy86_Update(g_gyHandle, chip);
+	retVal = gy86_Update(g_gyHandle, chip);
 	if (retVal) {
 		ERROR("Failed to Update the GY-86 Module chips");
 		goto END;
@@ -276,7 +276,7 @@ static retcode handle_gy86_reset (void) {
 		//Get the part to reset (or all)
 		char *token = strtok(NULL, " ");
 		if (token != NULL){
-			mode = mpu60x0_parseResetMode(token);
+			mode = mpu60x0_ParseResetMode(token);
 
 			if (mode == RESET_MODE_INVALID) {
 				ERROR("Invalid Reset Mode ...Exiting");

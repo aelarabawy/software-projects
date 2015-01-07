@@ -3737,7 +3737,7 @@ static bool getIsOpenDrainInt(Mpu60x0 *mpu) {
 	return isOpen;
 }
 
-static bool getIsLatchInt(Mpu60x0 *) {
+static bool getIsLatchInt(Mpu60x0 *mpu) {
 	ENTER();
 
 	bool isLatch;
@@ -3756,7 +3756,7 @@ static bool getIsLatchInt(Mpu60x0 *) {
 	return isLatch;
 }
 
-static bool getClearOnReadInt(Mpu60x0 *) {
+static bool getClearOnReadInt(Mpu60x0 *mpu) {
 	ENTER();
 
 	bool clearOnRead;
@@ -4321,6 +4321,12 @@ static retcode getAccData(Mpu60x0 *mpu,
 	case ACC_FULL_SCALE_16G:
 		sens = 2048.0;
 		break;
+
+	default:
+		ERROR("Invalid ACC FSR value");
+		retVal = -1;
+		goto END;
+		break;
 	}
 
 	if (mpu->m_activeConfigs.m_activeSensors & SENSOR_ACC_X) {
@@ -4384,6 +4390,12 @@ static retcode getGyroData(Mpu60x0 *mpu,
 
 	case GYRO_FULL_SCALE_2000:
 		sens = 16.4;
+		break;
+
+	default:
+		ERROR("Invalid Gyro FSR value");
+		retVal = -1;
+		goto END;
 		break;
 	}
 

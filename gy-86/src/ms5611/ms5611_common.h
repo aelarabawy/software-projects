@@ -18,7 +18,7 @@ typedef void* msHandle;
  * This enable us to have 2 MPU Chips on the same I2C bus
  */
 typedef enum {
-	I2C_ADDR_INVALID = 0,
+	I2C_ADDR_CSB_INVALID = 0,
 	I2C_ADDR_CSB_LOW,     //CSB = 0
 	I2C_ADDR_CSB_HIGH     //CSB = 1
 } Ms5611_I2cAddr;
