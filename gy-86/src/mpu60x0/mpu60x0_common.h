@@ -21,7 +21,8 @@ typedef uint32 slvHandle;
  * This enable us to have 2 MPU Chips on the same I2C bus
  */
 typedef enum {
-	I2C_ADDR_LOW = 0,     //AD0 = 0
+	I2C_ADDR_INVALID = 0,
+	I2C_ADDR_LOW,         //AD0 = 0
 	I2C_ADDR_HIGH         //AD0 = 1
 } Mpu60x0_I2cAddr;
 
@@ -29,7 +30,8 @@ typedef enum {
  * Clock source for the MPU Chip
  */
 typedef enum {
-	CLK_SRC_INT_OSC = 0,
+	CLK_SRC_INVALID = 0,
+	CLK_SRC_INT_OSC,
 	CLK_SRC_GYRO,           //The lower layers will decide on which Gyro internal clock source to use
 	CLK_SRC_EXT_LOW,        //32.768 KHz
 	CLK_SRC_EXT_HIGH        //19.2 MHz
@@ -40,7 +42,8 @@ typedef enum {
  * LPF Values
  */
 typedef enum {
-	LPF_NONE = 0,
+	LPF_INVALID = 0,
+	LPF_NONE,
 	LPF_184_188,
 	LPF_94_98,
 	LPF_44_42,
@@ -55,7 +58,8 @@ typedef enum {
  *
  */
 typedef enum {
-	ACC_FULL_SCALE_2G = 0,
+	ACC_FULL_SCALE_INVALID = 0,
+	ACC_FULL_SCALE_2G,
 	ACC_FULL_SCALE_4G,
 	ACC_FULL_SCALE_8G,
 	ACC_FULL_SCALE_16G
@@ -66,7 +70,8 @@ typedef enum {
  * Full Scale Range for the Gyroscope
  */
 typedef enum {
-	GYRO_FULL_SCALE_250 = 0,
+	GYRO_FULL_SCALE_INVALID = 0,
+	GYRO_FULL_SCALE_250,
 	GYRO_FULL_SCALE_500,
 	GYRO_FULL_SCALE_1000,
 	GYRO_FULL_SCALE_2000
@@ -89,7 +94,8 @@ typedef enum {
  * Interrupt Signal
  */
 typedef enum {
-    INT_LVL_NO_INT = 0,
+	INT_LVL_INVALID = 0,
+    INT_LVL_NO_INT,
 	INT_LVL_ACTIVE_HIGH,
 	INT_LVL_ACTIVE_LOW
 } Mpu60x0_IntLvl;
@@ -123,7 +129,8 @@ typedef enum {
 } Mpu60x0_SensorId;
 
 typedef enum {
-	LP_WAKE_FREQ_1 = 0,
+	LP_WAKE_FREQ_INVALID = 0,
+	LP_WAKE_FREQ_1,
 	LP_WAKE_FREQ_5,
 	LP_WAKE_FREQ_20,
 	LP_WAKE_FREQ_40
@@ -134,13 +141,15 @@ typedef enum {
  *  Auxiliary I2C Bus Mode
  */
 typedef enum {
-	AUX_I2C_DISABLE = 0,
+	AUX_I2C_INVALID = 0,
+	AUX_I2C_DISABLE,
 	AUX_I2C_BYPASS,
 	AUX_I2C_MSTR
 } Mpu60x0_AuxI2cMode;
 
 typedef enum {
-	AUX_I2C_CLK_258 = 0,
+	AUX_I2C_CLK_INVALID = 0,
+	AUX_I2C_CLK_258,
 	AUX_I2C_CLK_267,
 	AUX_I2C_CLK_276,
 	AUX_I2C_CLK_286,
@@ -159,7 +168,8 @@ typedef enum {
 } Mpu60x0_AuxI2cClk;
 
 typedef enum {
-	ACCESS_OPER_READ = 0,
+	ACCESS_OPER_INVALID = 0,
+	ACCESS_OPER_READ,
 	ACCESS_OPER_WRITE
 } Mpu60x0_AccessOper;
 

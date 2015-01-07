@@ -36,7 +36,7 @@ retcode (*hmcGetHandlers[])(ConfigDataSrc) = { handle_get_i2c_clk_speed,
 									           handle_get_measure_gain };
 
 /**
- * Get functions prototypes
+ * Set functions prototypes
  */
 static retcode handle_set_i2c_clk_speed (char *);
 static retcode handle_set_oper_mode (char *);
@@ -298,14 +298,288 @@ END:
 	return retVal;
 }
 
-static retcode handle_get_measure_mode (ConfigDataSrc src);
-static retcode handle_get_measure_gain (ConfigDataSrc src);
+static retcode handle_get_measure_mode (ConfigDataSrc src) {
+	ENTER();
 
-static retcode handle_get_i2c_clk_speed (void);
-static retcode handle_get_oper_mode (void);
-static retcode handle_get_data_rate (void);
-static retcode handle_get_osr (void);
-static retcode handle_get_measure_mode (void);
-static retcode handle_get_measure_gain (void);
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	char modeStr [100];
+	Hmc5883_MeasureMode mode;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		mode = hmc5883_GetMeasureMode(gy->m_ms, src);
+		retVal = hmc5883_ConvertMeasureMode2String(mode, &modeStr);
+		if (retVal) {
+			ERROR("Failed to convert %d into an Measure Mode Value", mode);
+			PRINT_CLI("ERROR: Failed to convert %d into an Measure Mode Value", mode);
+			goto END;
+		}
+
+		INFO("Over Sampling Ratio = %d",modeStr);
+		PRINT_CLI("Over Sampling Ratio = %d",modeStr);
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_get_measure_gain (ConfigDataSrc src) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	char gainStr [100];
+	Hmc5883_MeasureGain gain;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		gain = hmc5883_GetMeasureGain(gy->m_ms, src);
+		retVal = hmc5883_ConvertMeasureGain2String(gain, &gainStr);
+		if (retVal) {
+			ERROR("Failed to convert %d into an Measure Gain Value", gain);
+			PRINT_CLI("ERROR: Failed to convert %d into an Measure Gain Value", gain);
+			goto END;
+		}
+
+		INFO("Over Sampling Ratio = %d",gainStr);
+		PRINT_CLI("Over Sampling Ratio = %d",gainStr);
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_set_i2c_clk_speed (char *speedStr) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	Hmc5883_I2cBusSpeed speed;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		speed = hmc5883_ParseBusSpeed(speedStr);
+		if (speed == I2C_BUS_SPEED_INVALID) {
+			ERROR("Invalid Bus Speed %s", speedStr);
+			PRINT_CLI("ERROR: Invalid Bus Speed %s", speedStr);
+			retVal = -1;
+			goto END;
+		}
+
+		retVal = hmc5883_SetI2cBusSpeed(gy->m_ms, speed);
+		if (retVal) {
+			ERROR("Failed to set the I2C Bus Speed ");
+			PRINT_CLI("ERROR: Failed to set the I2C Bus Speed ");
+			goto END;
+		} else {
+			INFO("Setting I2C Bus Speed for the HMC-5883 Chip");
+			PRINT_CLI("Setting I2C Bus Speed for the HMC-5883 Chip");
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_set_oper_mode (char *modeStr) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	Hmc5883_OperMode mode;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		mode = hmc5883_ParseOperMode(modeStr);
+		if (mode == OPER_MODE_INVALID) {
+			ERROR("Invalid Operation Mode %s", modeStr);
+			PRINT_CLI("ERROR: Invalid Operation Mode %s", modeStr);
+			retVal = -1;
+			goto END;
+		}
+
+		retVal = hmc5883_SetOperMode(gy->m_ms, mode);
+		if (retVal) {
+			ERROR("Failed to set the Operating Mode ");
+			PRINT_CLI("ERROR: Failed to set the Operating Mode ");
+			goto END;
+		} else {
+			INFO("Setting Operating Mode for the HMC-5883 Chip");
+			PRINT_CLI("Setting Operating Mode for the HMC-5883 Chip");
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_set_data_rate (char *rateStr) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	Hmc5883_DataOutRate rate;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		rate = hmc5883_ParseDataRate(rateStr);
+		if (rate == DATA_OUT_RATE_INVALID) {
+			ERROR("Invalid Data Rate %s", rateStr);
+			PRINT_CLI("ERROR: Invalid Data Rate %s", rateStr);
+			retVal = -1;
+			goto END;
+		}
+
+		retVal = hmc5883_SetDataOutRate(gy->m_ms, rate);
+		if (retVal) {
+			ERROR("Failed to set the Data Rate ");
+			PRINT_CLI("ERROR: Failed to set the Data Rate ");
+			goto END;
+		} else {
+			INFO("Setting Data Rate for the HMC-5883 Chip");
+			PRINT_CLI("Setting Data Rate for the HMC-5883 Chip");
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_set_osr (char *osrStr) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	Hmc5883_OverSmplRatio osr;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		osr = hmc5883_ParseOsr(osrStr);
+		if (osr == OVER_SMPL_RATIO_INVALID) {
+			ERROR("Invalid Over Sampling Ratio %s", osrStr);
+			PRINT_CLI("ERROR: Invalid Over Sampling Ratio %s", osrStr);
+			retVal = -1;
+			goto END;
+		}
+
+		retVal = hmc5883_SetOverSmplRatio(gy->m_ms, osr);
+		if (retVal) {
+			ERROR("Failed to set the Over Sampling Ratio ");
+			PRINT_CLI("ERROR: Failed to set the Over Sampling Ratio ");
+			goto END;
+		} else {
+			INFO("Setting Over Sampling Ratio for the HMC-5883 Chip");
+			PRINT_CLI("Setting Over Sampling Ratio for the HMC-5883 Chip");
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_set_measure_mode (char *modeStr) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	Hmc5883_MeasureMode mode;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		mode = hmc5883_ParseMeasureMode(modeStr);
+		if (mode == MEASURE_MODE_INVALID) {
+			ERROR("Invalid Measurement Mode %s", modeStr);
+			PRINT_CLI("ERROR: Invalid Measurement Mode %s", modeStr);
+			retVal = -1;
+			goto END;
+		}
+
+		retVal = hmc5883_SetMeasureMode(gy->m_ms, mode);
+		if (retVal) {
+			ERROR("Failed to set the Measurement Mode ");
+			PRINT_CLI("ERROR: Failed to set the Measurement Mode ");
+			goto END;
+		} else {
+			INFO("Setting Measurement Mode for the HMC-5883 Chip");
+			PRINT_CLI("Setting Measurement Mode for the HMC-5883 Chip");
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode handle_set_measure_gain (char *gainStr) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)g_gyHandle;
+	Hmc5883_MeasureGain gain;
+
+	if (!gy->m_ms) {
+		ERROR("MS chip is not initialized");
+		PRINT_CLI("ERROR: MS chip is not initialized");
+		retVal = -1;
+		goto END;
+	} else {
+		gain = hmc5883_ParseMeasureGain(gainStr);
+		if (gain == MEASURE_GAIN_INVALID) {
+			ERROR("Invalid Measurement Gain %s", gainStr);
+			PRINT_CLI("ERROR: Invalid Measurement Gain %s", gainStr);
+			retVal = -1;
+			goto END;
+		}
+
+		retVal = hmc5883_SetMeasureGain(gy->m_ms, gain);
+		if (retVal) {
+			ERROR("Failed to set the Measurement Gain ");
+			PRINT_CLI("ERROR: Failed to set the Measurement Gain ");
+			goto END;
+		} else {
+			INFO("Setting Measurement Gain for the HMC-5883 Chip");
+			PRINT_CLI("Setting Measurement Gain for the HMC-5883 Chip");
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
 
 

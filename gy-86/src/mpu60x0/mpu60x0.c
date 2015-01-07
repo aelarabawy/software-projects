@@ -40,6 +40,11 @@ static Mpu60x0_GyroFullScale getGyroFullScale (Mpu60x0 *);
 static bool getFifoUsage(Mpu60x0 *);
 static uint8 getMotDetThr (Mpu60x0 *);
 static uint8 getActiveSensors (Mpu60x0 *);
+static Mpu60x0_IntLvl getIntLvl (Mpu60x0 *);
+static bool getIsOpenDrainInt(Mpu60x0 *);
+static bool getIsLatchInt(Mpu60x0 *);
+static bool getClearOnReadInt(Mpu60x0 *);
+
 static Mpu60x0_AuxI2cMode getAuxI2cMode (Mpu60x0 *);
 static Mpu60x0_AuxI2cClk getAuxI2cClk (Mpu60x0 *);
 static uint8 getAuxI2cReducedSamplingFactor (Mpu60x0 *);
@@ -340,6 +345,63 @@ END:
 	return clk;
 }
 
+retcode mpu60x0_ConvertClkSrc2String(Mpu60x0_ClkSrc clk, char **pClkStr) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (clk) {
+	case CLK_SRC_INT_OSC:
+		strcpy(*pClkStr, "Internal Oscillator");
+		break;
+
+	case CLK_SRC_GYRO:
+		strcpy(*pClkStr, "Internal PLL using Gyroscope Oscillator");
+		break;
+
+	case CLK_SRC_EXT_LOW:
+		strcpy(*pClkStr, "External Clock (32.768 KHz)");
+		break;
+
+	case CLK_SRC_EXT_HIGH:
+		strcpy(*pClkStr, "External Clock (19.2 MHz)");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Mpu60x0_ClkSrc mpu60x0_ParseClkSrc (char *clkStr) {
+
+	ENTER();
+
+	Mpu60x0_ClkSrc clk;
+
+	if (strcmp(clkStr, "internal") == 0) {
+		clk = CLK_SRC_INT_OSC;
+	} else if (strcmp(clkStr, "pll") == 0) {
+		clk = CLK_SRC_GYRO;
+	} else if (strcmp(clkStr, "external-low") == 0) {
+		clk = CLK_SRC_EXT_LOW;
+	} else if (strcmp(gainStr, "external-high") == 0) {
+		clk = CLK_SRC_EXT_HIGH;
+	} else {
+		ERROR("Invalid Clock source %s", clkStr);
+		clk = CLK_SRC_INVALID;
+	}
+
+END:
+	EXIT();
+	return clk;
+}
+
 
 uint32 mpu60x0_SetSamplingRate (mpuHandle handle,
                                 uint32 rate,
@@ -461,6 +523,88 @@ END:
 	return lpf;
 }
 
+retcode mpu60x0_ConvertLpf2String(Mpu60x0_Lpf lpf, char **pLpfStr) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (lpf) {
+	case LPF_NONE:
+		strcpy(*pLpfStr, "LPF None");
+		break;
+
+	case LPF_184_188:
+		strcpy(*pLpfStr, "LPF 184,188");
+		break;
+
+	case LPF_94_98:
+		strcpy(*pLpfStr, "LPF 94,98");
+		break;
+
+	case LPF_44_42:
+		strcpy(*pLpfStr, "LPF 44,42");
+		break;
+
+	case LPF_21_20:
+		strcpy(*pLpfStr, "LPF 21,20");
+		break;
+
+	case LPF_10_10:
+		strcpy(*pLpfStr, "LPF 10,10");
+		break;
+
+	case LPF_5_5:
+		strcpy(*pLpfStr, "LPF 5,5");
+		break;
+
+	case LPF_RESERVED:
+		strcpy(*pLpfStr, "LPF Reserved");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Mpu60x0_Lpf mpu60x0_ParseLpf (char *lpfStr) {
+
+	ENTER();
+
+	Mpu60x0_Lpf lpf;
+
+	if (strcmp(lpfStr, "none") == 0) {
+		lpf = LPF_NONE;
+	} else if (strcmp(lpfStr, "184-188") == 0) {
+		lpf = LPF_184_188;
+	} else if (strcmp(lpfStr, "94-98") == 0) {
+		lpf = LPF_94_98;
+	} else if (strcmp(lpfStr, "44-42") == 0) {
+		lpf = LPF_44_42;
+	} else if (strcmp(lpfStr, "21-20") == 0) {
+		lpf = LPF_21_20;
+	} else if (strcmp(lpfStr, "10-10") == 0) {
+		lpf = LPF_10_10;
+	} else if (strcmp(lpfStr, "5-5") == 0) {
+		lpf = LPF_5_5;
+	} else if (strcmp(lpfStr, "reserved") == 0) {
+		lpf = LPF_RESERVED;
+	} else {
+		ERROR("Invalid LPF value %s", lpfStr);
+		lpf = LPF_INVALID;
+	}
+
+END:
+	EXIT();
+	return lpf;
+}
+
+
 
 retcode mpu60x0_SetAccFullScale (mpuHandle handle,
 		                         const Mpu60x0_AccFullScale scale) {
@@ -514,6 +658,63 @@ Mpu60x0_AccFullScale mpu60x0_GetAccFullScale (mpuHandle handle, const ConfigData
 END:
 	EXIT();
 	return scale;
+}
+
+retcode mpu60x0_ConvertAccFsr2String(Mpu60x0_AccFullScale fsr, char **pFsrStr) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (fsr) {
+	case ACC_FULL_SCALE_2G:
+		strcpy(*pFsrStr, "2g");
+		break;
+
+	case ACC_FULL_SCALE_4G:
+		strcpy(*pFsrStr, "4g");
+		break;
+
+	case ACC_FULL_SCALE_8G:
+		strcpy(*pFsrStr, "8g");
+		break;
+
+	case ACC_FULL_SCALE_16G:
+		strcpy(*pFsrStr, "16g");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Mpu60x0_AccFullScale mpu60x0_ParseAccFsr (char *fsrStr) {
+
+	ENTER();
+
+	Mpu60x0_AccFullScale fsr;
+
+	if (strcmp(fsrStr, "2g") == 0) {
+		fsr = ACC_FULL_SCALE_2G;
+	} else if (strcmp(fsrStr, "4g") == 0) {
+		fsr = ACC_FULL_SCALE_4G;
+	} else if (strcmp(fsrStr, "8g") == 0) {
+		fsr = ACC_FULL_SCALE_8G;
+	} else if (strcmp(fsrStr, "16g") == 0) {
+		fsr = ACC_FULL_SCALE_16G;
+	} else {
+		ERROR("Invalid Accelerometer FSR value %s", fsrStr);
+		fsr = ACC_FULL_SCALE_INVALID;
+	}
+
+END:
+	EXIT();
+	return fsr;
 }
 
 
@@ -571,6 +772,63 @@ END:
 	return scale;
 }
 
+retcode mpu60x0_ConvertGyroFsr2String(Mpu60x0_GyroFullScale fsr, char **pFsrStr) {
+
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (fsr) {
+	case GYRO_FULL_SCALE_250:
+		strcpy(*pFsrStr, "250");
+		break;
+
+	case GYRO_FULL_SCALE_500:
+		strcpy(*pFsrStr, "500");
+		break;
+
+	case GYRO_FULL_SCALE_1000:
+		strcpy(*pFsrStr, "1000");
+		break;
+
+	case GYRO_FULL_SCALE_2000:
+		strcpy(*pFsrStr, "2000");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Mpu60x0_GyroFullScale mpu60x0_ParseGyroFsr (char *fsrStr) {
+
+	ENTER();
+
+	Mpu60x0_GyroFullScale fsr;
+
+	if (strcmp(fsrStr, "250") == 0) {
+		fsr = GYRO_FULL_SCALE_250;
+	} else if (strcmp(fsrStr, "500") == 0) {
+		fsr = GYRO_FULL_SCALE_500;
+	} else if (strcmp(fsrStr, "1000") == 0) {
+		fsr = GYRO_FULL_SCALE_1000;
+	} else if (strcmp(fsrStr, "2000") == 0) {
+		fsr = GYRO_FULL_SCALE_2000;
+	} else {
+		ERROR("Invalid Gyroscope FSR value %s", fsrStr);
+		fsr = GYRO_FULL_SCALE_INVALID;
+	}
+
+END:
+	EXIT();
+	return fsr;
+}
 
 
 retcode mpu60x0_RegDataRdyCb (mpuHandle handle,
@@ -709,6 +967,178 @@ retcode mpu60x0_ConfigIntSignal (mpuHandle handle,
 END:
 	EXIT();
 	return retVal;
+}
+
+Mpu60x0_IntLvl mpu60x0_GetIntLvl (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	Mpu60x0_IntLvl lvl;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		lvl = mpu->m_configs.m_intLvl;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		lvl = mpu->m_activeConfigs.m_intLvl;
+		break;
+
+	case DATA_SRC_HW:
+		lvl = getIntLvl(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return lvl;
+}
+
+bool mpu60x0_GetIntOpen (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	bool isOpen;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		isOpen = mpu->m_configs.m_intIsOpenDrain;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		isOpen = mpu->m_activeConfigs.m_intIsOpenDrain;
+		break;
+
+	case DATA_SRC_HW:
+		isOpen = getIsOpenDrainInt(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return isOpen;
+}
+
+bool mpu60x0_GetIntLatch (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	bool isLatch;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		isLatch = mpu->m_configs.m_intIsLatchOn;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		isLatch = mpu->m_activeConfigs.m_intIsLatchOn;
+		break;
+
+	case DATA_SRC_HW:
+		isLatch = getIsLatchInt(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return isLatch;
+}
+
+bool mpu60x0_GetIntClearOnRead (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	bool clearOnRead;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		clearOnRead = mpu->m_configs.m_intClearOnAnyRead;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		clearOnRead = mpu->m_activeConfigs.m_intClearOnAnyRead;
+		break;
+
+	case DATA_SRC_HW:
+		clearOnRead = getClearOnReadInt(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return clearOnRead;
+}
+
+retcode mpu60x0_ConvertIntLvl2String(Mpu60x0_IntLvl lvl, char **pLvlStr) {
+
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (lvl) {
+	case INT_LVL_NO_INT:
+		strcpy(*pLvlStr, "No Interrupt Enabled");
+		break;
+
+	case INT_LVL_ACTIVE_LOW:
+		strcpy(*pLvlStr, "Interrupt Level Active Low");
+		break;
+
+	case INT_LVL_ACTIVE_HIGH:
+		strcpy(*pLvlStr, "Interrupt Level Active High");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Mpu60x0_IntLvl mpu60x0_ParseIntLvl (char *lvlStr) {
+
+	ENTER();
+
+	Mpu60x0_IntLvl lvl;
+
+	if (strcmp(lvlStr, "disabled") == 0) {
+		lvl = INT_LVL_NO_INT;
+	} else if (strcmp(lvlStr, "active-high") == 0) {
+		lvl = INT_LVL_ACTIVE_HIGH;
+	} else if (strcmp(lvlStr, "active-low") == 0) {
+		lvl = INT_LVL_ACTIVE_LOW;
+	} else {
+		ERROR("Invalid Interrupt Level value %s", lvlStr);
+		lvl = INT_LVL_INVALID;
+	}
+
+END:
+	EXIT();
+	return lvl;
 }
 
 /**
@@ -936,6 +1366,59 @@ END:
 	return mode;
 }
 
+retcode mpu60x0_ConvertAuxI2cMode2String(Mpu60x0_AuxI2cMode mode, char **pModeStr) {
+
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (mode) {
+	case AUX_I2C_DISABLE:
+		strcpy(*pModeStr, "I2C Disabled");
+		break;
+
+	case AUX_I2C_BYPASS:
+		strcpy(*pModeStr, "I2C Bypassed (the host processor is the bus master)");
+		break;
+
+	case AUX_I2C_MSTR:
+		strcpy(*pModeStr, "I2C Master (the MPU acts as a I2C Bus Master)");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+Mpu60x0_AuxI2cMode mpu60x0_ParseAuxI2cMode (char *modeStr) {
+
+	ENTER();
+
+	Mpu60x0_AuxI2cMode mode;
+
+	if (strcmp(modeStr, "disabled") == 0) {
+		mode = AUX_I2C_DISABLE;
+	} else if (strcmp(modeStr, "bypass") == 0) {
+		mode = AUX_I2C_BYPASS;
+	} else if (strcmp(modeStr, "master") == 0) {
+		mode = AUX_I2C_MSTR;
+	} else {
+		ERROR("Invalid Auxiliary I2C Bus Mode value %s", modeStr);
+		mode = AUX_I2C_INVALID;
+	}
+
+END:
+	EXIT();
+	return mode;
+}
+
+
 retcode mpu60x0_SetAuxI2cClk (mpuHandle handle,
 		                      const Mpu60x0_AuxI2cClk clk) {
 	ENTER();
@@ -989,6 +1472,140 @@ END:
 	EXIT();
 	return clk;
 }
+
+retcode mpu60x0_ConvertAuxI2cClk2String(Mpu60x0_AuxI2cClk clk, char **pClkStr) {
+
+	ENTER();
+
+	retcode retVal = 0;
+
+	switch (clk) {
+	case AUX_I2C_CLK_258:
+		strcpy(*pClkStr, "258 KHz");
+		break;
+
+	case AUX_I2C_CLK_267:
+		strcpy(*pClkStr, "267 KHz");
+		break;
+
+	case AUX_I2C_CLK_276:
+		strcpy(*pClkStr, "276 KHz");
+		break;
+
+	case AUX_I2C_CLK_286:
+		strcpy(*pClkStr, "286 KHz");
+		break;
+
+	case AUX_I2C_CLK_296:
+		strcpy(*pClkStr, "296 KHz");
+		break;
+
+	case AUX_I2C_CLK_308:
+		strcpy(*pClkStr, "308 KHz");
+		break;
+
+	case AUX_I2C_CLK_320:
+		strcpy(*pClkStr, "320 KHz");
+		break;
+
+	case AUX_I2C_CLK_333:
+		strcpy(*pClkStr, "333 KHz");
+		break;
+
+	case AUX_I2C_CLK_348:
+		strcpy(*pClkStr, "348 KHz");
+		break;
+
+	case AUX_I2C_CLK_364:
+		strcpy(*pClkStr, "364 KHz");
+		break;
+
+	case AUX_I2C_CLK_381:
+		strcpy(*pClkStr, "381 KHz");
+		break;
+
+	case AUX_I2C_CLK_400:
+		strcpy(*pClkStr, "400 KHz");
+		break;
+
+	case AUX_I2C_CLK_421:
+		strcpy(*pClkStr, "421 KHz");
+		break;
+
+	case AUX_I2C_CLK_444:
+		strcpy(*pClkStr, "444 KHz");
+		break;
+
+	case AUX_I2C_CLK_471:
+		strcpy(*pClkStr, "471 KHz");
+		break;
+
+	case AUX_I2C_CLK_500:
+		strcpy(*pClkStr, "500 KHz");
+		break;
+
+	default:
+		retVal = -1;
+		goto END;
+		break;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+
+Mpu60x0_AuxI2cClk mpu60x0_ParseAuxI2cClk (char *clkStr) {
+
+	ENTER();
+
+	Mpu60x0_AuxI2cClk clk;
+
+	if (strcmp(clkStr, "258") == 0) {
+		clk = AUX_I2C_CLK_258;
+	} else if (strcmp(clkStr, "267") == 0) {
+		clk = AUX_I2C_CLK_267;
+	} else if (strcmp(clkStr, "276") == 0) {
+		clk = AUX_I2C_CLK_276;
+	} else if (strcmp(clkStr, "286") == 0) {
+		clk = AUX_I2C_CLK_286;
+	} else if (strcmp(clkStr, "296") == 0) {
+		clk = AUX_I2C_CLK_296;
+	} else if (strcmp(clkStr, "308") == 0) {
+		clk = AUX_I2C_CLK_308;
+	} else if (strcmp(clkStr, "320") == 0) {
+		clk = AUX_I2C_CLK_320;
+	} else if (strcmp(clkStr, "333") == 0) {
+		clk = AUX_I2C_CLK_333;
+	} else if (strcmp(clkStr, "348") == 0) {
+		clk = AUX_I2C_CLK_348;
+	} else if (strcmp(clkStr, "364") == 0) {
+		clk = AUX_I2C_CLK_364;
+	} else if (strcmp(clkStr, "381") == 0) {
+		clk = AUX_I2C_CLK_381;
+	} else if (strcmp(clkStr, "400") == 0) {
+		clk = AUX_I2C_CLK_400;
+	} else if (strcmp(clkStr, "421") == 0) {
+		clk = AUX_I2C_CLK_421;
+	} else if (strcmp(clkStr, "444") == 0) {
+		clk = AUX_I2C_CLK_444;
+	} else if (strcmp(clkStr, "471") == 0) {
+		clk = AUX_I2C_CLK_471;
+	} else if (strcmp(clkStr, "500") == 0) {
+		clk = AUX_I2C_CLK_500;
+	} else {
+		ERROR("Invalid Auxiliary I2C Bus Clock Speed value %s", clkStr);
+		clk = AUX_I2C_CLK_INVALID;
+	}
+
+END:
+	EXIT();
+	return clk;
+}
+
+
+
 
 retcode mpu60x0_SetAuxI2cReducedSamplingFactor (mpuHandle handle,
 		                                        const uint8 factor) {
@@ -3021,6 +3638,82 @@ static bool getFifoUsage(Mpu60x0 *mpu) {
 
 	EXIT();
 	return fifo;
+}
+
+static Mpu60x0_IntLvl getIntLvl (Mpu60x0 *mpu) {
+	ENTER();
+
+	Mpu60x0_IntLvl lvl;
+	uint8 val;
+
+	val = readReg(mpu, MPU60X0_REG_INT_PIN_CFG);
+
+	if  (val &= MPU60X0_FIELD_INT_LEVEL) {
+		lvl = INT_LVL_ACTIVE_LOW;
+	} else {
+		lvl = INT_LVL_ACTIVE_HIGH;
+	}
+
+	EXIT();
+	return lvl;
+}
+
+
+static bool getIsOpenDrainInt(Mpu60x0 *mpu) {
+	ENTER();
+
+	bool isOpen;
+	uint8 val;
+
+	val = readReg(mpu, MPU60X0_REG_INT_PIN_CFG);
+
+	val &= MPU60X0_FIELD_INT_OPEN;
+	if (val) {
+		isOpen = TRUE;
+	} else {
+		isOpen = FALSE;
+	}
+
+	EXIT();
+	return isOpen;
+}
+
+static bool getIsLatchInt(Mpu60x0 *) {
+	ENTER();
+
+	bool isLatch;
+	uint8 val;
+
+	val = readReg(mpu, MPU60X0_REG_INT_PIN_CFG);
+
+	val &= MPU60X0_FIELD_LATCH_INT_EN;
+	if (val) {
+		isLatch = TRUE;
+	} else {
+		isLatch = FALSE;
+	}
+
+	EXIT();
+	return isLatch;
+}
+
+static bool getClearOnReadInt(Mpu60x0 *) {
+	ENTER();
+
+	bool clearOnRead;
+	uint8 val;
+
+	val = readReg(mpu, MPU60X0_REG_INT_PIN_CFG);
+
+	val &= MPU60X0_FIELD_INT_RD_CLEAR;
+	if (val) {
+		clearOnRead = TRUE;
+	} else {
+		clearOnRead = FALSE;
+	}
+
+	EXIT();
+	return clearOnRead;
 }
 
 static uint8 getMotDetThr (Mpu60x0 *mpu) {

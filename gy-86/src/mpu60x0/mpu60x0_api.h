@@ -97,6 +97,10 @@ uint8 mpu60x0_GetI2cAddr (mpuHandle);
  */
 retcode mpu60x0_SetClkSrc (mpuHandle, const Mpu60x0_ClkSrc);
 Mpu60x0_ClkSrc mpu60x0_GetClkSrc (mpuHandle , const ConfigDataSrc);
+retcode mpu60x0_ConvertClkSrc2String(Mpu60x0_ClkSrc, char **);
+Mpu60x0_ClkSrc mpu60x0_ParseClkSrc (char *);
+
+
 
 
 /**
@@ -108,6 +112,8 @@ Mpu60x0_ClkSrc mpu60x0_GetClkSrc (mpuHandle , const ConfigDataSrc);
 uint32 mpu60x0_SetSamplingRate (mpuHandle,uint32, Mpu60x0_Lpf);
 uint32 mpu60x0_GetSamplingRate (mpuHandle, const ConfigDataSrc);
 Mpu60x0_Lpf mpu60x0_GetLpf (mpuHandle, const ConfigDataSrc);
+retcode mpu60x0_ConvertLpf2String(Mpu60x0_Lpf, char **);
+Mpu60x0_Lpf mpu60x0_ParseLpf (char *);
 
 
 /**
@@ -115,12 +121,17 @@ Mpu60x0_Lpf mpu60x0_GetLpf (mpuHandle, const ConfigDataSrc);
  */
 retcode mpu60x0_SetAccFullScale (mpuHandle , const Mpu60x0_AccFullScale);
 Mpu60x0_AccFullScale mpu60x0_GetAccFullScale (mpuHandle, const ConfigDataSrc);
+retcode mpu60x0_ConvertAccFsr2String(Mpu60x0_AccFullScale, char **);
+Mpu60x0_AccFullScale mpu60x0_ParseAccFsr (char *);
+
 
 /**
  * These functions for Set/Get the Full Scale Range for the Gyroscope
  */
 retcode mpu60x0_SetGyroFullScale (mpuHandle, const Mpu60x0_GyroFullScale);
 Mpu60x0_GyroFullScale mpu60x0_GetGyroFullScale (mpuHandle, const ConfigDataSrc);
+retcode mpu60x0_ConvertGyroFsr2String(Mpu60x0_GyroFullScale, char **);
+Mpu60x0_GyroFullScale mpu60x0_ParseGyroFsr (char *);
 
 /**
  * Enable/Disable Using FIFO
@@ -145,12 +156,24 @@ uint8 mpu60x0_GetActiveSensors (mpuHandle, const ConfigDataSrc);
  * This function configures the Interrupt signal
  */
 retcode mpu60x0_ConfigIntSignal (mpuHandle, Mpu60x0_IntSignalConfig *);
+Mpu60x0_IntLvl mpu60x0_GetIntLvl (mpuHandle, const ConfigDataSrc);
+bool mpu60x0_GetIntOpen (mpuHandle, const ConfigDataSrc);
+bool mpu60x0_GetIntLatch (mpuHandle, const ConfigDataSrc);
+bool mpu60x0_GetIntClearOnRead (mpuHandle, const ConfigDataSrc);
+
+retcode mpu60x0_ConvertIntLvl2String(Mpu60x0_IntLvl, char **);
+Mpu60x0_IntLvl mpu60x0_ParseIntLvl (char *);
+
+
 
 /**
  * Set/Get Auxiliary I2C Bus mode
  */
 retcode mpu60x0_SetAuxI2c (mpuHandle, const Mpu60x0_AuxI2cMode);
 Mpu60x0_AuxI2cMode mpu60x0_GetAuxI2c (mpuHandle, const ConfigDataSrc);
+retcode mpu60x0_ConvertAuxI2cMode2String(Mpu60x0_AuxI2cMode, char **);
+Mpu60x0_AuxI2cMode mpu60x0_ParseAuxI2cMode (char *);
+
 
 
 /**
@@ -158,6 +181,9 @@ Mpu60x0_AuxI2cMode mpu60x0_GetAuxI2c (mpuHandle, const ConfigDataSrc);
  */
 retcode mpu60x0_SetAuxI2cClk (mpuHandle, const Mpu60x0_AuxI2cClk);
 Mpu60x0_AuxI2cClk mpu60x0_GetAuxI2cClk (mpuHandle, const ConfigDataSrc);
+retcode mpu60x0_ConvertAuxI2cClk2String(Mpu60x0_AuxI2cClk, char **);
+Mpu60x0_AuxI2cClk mpu60x0_ParseAuxI2cClk (char *);
+
 
 /**
  *  Set the Auxiliary I2C Reduced Sampling Factor
