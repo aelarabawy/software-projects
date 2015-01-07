@@ -264,6 +264,12 @@ retcode mpu60x0_SetI2cAddr (mpuHandle handle,
 	case I2C_ADDR_HIGH:
 		mpu->m_i2cAddr = MPU60X0_I2C_ADDRESS_HIGH;
 		break;
+
+	default:
+		ERROR("Invalid I2C Address Passed");
+		retVal = -1;
+		goto END;
+		break;
 	}
 
 END:
@@ -286,6 +292,28 @@ END:
 	EXIT();
 	return mpu->m_i2cAddr;
 }
+
+Mpu60x0_I2cAddr mpu60x0_ParseI2cAddr (char *addrStr) {
+
+	ENTER();
+
+	Mpu60x0_I2cAddr addr;
+
+	if (strcmp(addrStr, "low") == 0) {
+		addr = I2C_ADDR_LOW;
+	} else if (strcmp(addrStr, "high") == 0) {
+		addr = I2C_ADDR_HIGH;
+	} else {
+		ERROR("Invalid I2C Address %s", addrStr);
+		addr = I2C_ADDR_INVALID;
+		goto END;
+	}
+
+END:
+	EXIT();
+	return addr;
+}
+
 
 /**
  * These functions will set/get the clock source of the chip
@@ -390,11 +418,12 @@ Mpu60x0_ClkSrc mpu60x0_ParseClkSrc (char *clkStr) {
 		clk = CLK_SRC_GYRO;
 	} else if (strcmp(clkStr, "external-low") == 0) {
 		clk = CLK_SRC_EXT_LOW;
-	} else if (strcmp(gainStr, "external-high") == 0) {
+	} else if (strcmp(clkStr, "external-high") == 0) {
 		clk = CLK_SRC_EXT_HIGH;
 	} else {
 		ERROR("Invalid Clock source %s", clkStr);
 		clk = CLK_SRC_INVALID;
+		goto END;
 	}
 
 END:
@@ -491,6 +520,25 @@ uint32 mpu60x0_GetSamplingRate (mpuHandle handle,
 END:
 	EXIT();
 	return rate;
+}
+
+retcode mpu60x0_SetLpf (mpuHandle handle, Mpu60x0_Lpf lpf) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	retcode retVal = 0;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		retVal = -1;
+		goto END;
+	}
+
+	mpu->m_configs.m_dlpf = lpf;
+
+END:
+	EXIT();
+	return retVal;
 }
 
 Mpu60x0_Lpf mpu60x0_GetLpf (mpuHandle handle, const ConfigDataSrc dataSrc) {
@@ -597,6 +645,7 @@ Mpu60x0_Lpf mpu60x0_ParseLpf (char *lpfStr) {
 	} else {
 		ERROR("Invalid LPF value %s", lpfStr);
 		lpf = LPF_INVALID;
+		goto END;
 	}
 
 END:
@@ -710,6 +759,7 @@ Mpu60x0_AccFullScale mpu60x0_ParseAccFsr (char *fsrStr) {
 	} else {
 		ERROR("Invalid Accelerometer FSR value %s", fsrStr);
 		fsr = ACC_FULL_SCALE_INVALID;
+		goto END;
 	}
 
 END:
@@ -823,6 +873,7 @@ Mpu60x0_GyroFullScale mpu60x0_ParseGyroFsr (char *fsrStr) {
 	} else {
 		ERROR("Invalid Gyroscope FSR value %s", fsrStr);
 		fsr = GYRO_FULL_SCALE_INVALID;
+		goto END;
 	}
 
 END:
@@ -1134,6 +1185,7 @@ Mpu60x0_IntLvl mpu60x0_ParseIntLvl (char *lvlStr) {
 	} else {
 		ERROR("Invalid Interrupt Level value %s", lvlStr);
 		lvl = INT_LVL_INVALID;
+		goto END;
 	}
 
 END:
@@ -1411,6 +1463,7 @@ Mpu60x0_AuxI2cMode mpu60x0_ParseAuxI2cMode (char *modeStr) {
 	} else {
 		ERROR("Invalid Auxiliary I2C Bus Mode value %s", modeStr);
 		mode = AUX_I2C_INVALID;
+		goto END;
 	}
 
 END:
@@ -1597,6 +1650,7 @@ Mpu60x0_AuxI2cClk mpu60x0_ParseAuxI2cClk (char *clkStr) {
 	} else {
 		ERROR("Invalid Auxiliary I2C Bus Clock Speed value %s", clkStr);
 		clk = AUX_I2C_CLK_INVALID;
+		goto END;
 	}
 
 END:
@@ -3295,8 +3349,13 @@ static uint8 getDlpfEncoding (const Mpu60x0_Lpf lpf) {
 	case LPF_RESERVED:
 		val = MPU60X0_LPF_RESERVED;
 		break;
+
+	default:
+		ERROR("Invalid LPF value");
+		goto END;
 	}
 
+END:
 	EXIT();
 	return val;
 }

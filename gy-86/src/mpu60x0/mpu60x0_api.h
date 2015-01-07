@@ -91,6 +91,7 @@ retcode mpu60x0_RegAuxI2cCb (mpuHandle, void *, uint32);
  */
 retcode mpu60x0_SetI2cAddr (mpuHandle, const Mpu60x0_I2cAddr);
 uint8 mpu60x0_GetI2cAddr (mpuHandle);
+Mpu60x0_I2cAddr mpu60x0_ParseI2cAddr (char *);
 
 /**
  * These functions will Set/Get the clock source of the chip
@@ -111,6 +112,7 @@ Mpu60x0_ClkSrc mpu60x0_ParseClkSrc (char *);
  */
 uint32 mpu60x0_SetSamplingRate (mpuHandle,uint32, Mpu60x0_Lpf);
 uint32 mpu60x0_GetSamplingRate (mpuHandle, const ConfigDataSrc);
+retcode mpu60x0_SetLpf (mpuHandle, Mpu60x0_Lpf);
 Mpu60x0_Lpf mpu60x0_GetLpf (mpuHandle, const ConfigDataSrc);
 retcode mpu60x0_ConvertLpf2String(Mpu60x0_Lpf, char **);
 Mpu60x0_Lpf mpu60x0_ParseLpf (char *);

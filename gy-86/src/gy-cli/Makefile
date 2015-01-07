@@ -46,36 +46,36 @@ $(OBJ_DIR)/%.o: %.c $(DEP)
 .PHONY: _logger
 _logger: force
 	echo "Building Logger"
-	cd logger ; make ; make install
+	cd ../logger ; make ; make install
 
 .PHONY: _mpu60x0
 _mpu60x0: force
 	echo "Building MPU60X0"
-	cd mpu60x0 ; make ; make install
+	cd ../mpu60x0 ; make ; make install
 
 .PHONY: _ms5611
 _ms5611: force
 	echo "Building MS5611"
-	cd ms5611 ; make ; make install
+	cd ../ms5611 ; make ; make install
 
 .PHONY: _hmc5883
 _hmc5883: force
 	echo "Building HMC5883"
-	cd hmc5883 ; make ; make install
+	cd ../hmc5883 ; make ; make install
 
 .PHONY: _gy86
 _gy86: force
 	echo "Building GY86"
-	cd gy86 ; make ; make install
+	cd ../gy86 ; make ; make install
 
 .PHONY: clean
 clean:
 	rm -f $(OBJ_DIR)/*.o *~ core $(INCLUDE_DIR)/*~ $(CUR_DIR)/$(BIN_NAME)
-	cd logger  ; make clean
-	cd mpu60x0 ; make clean
-	cd hmc5883 ; make clean
-	cd ms5611  ; make clean
-	cd gy86    ; make clean 
+	cd ../logger  ; make clean
+	cd ../mpu60x0 ; make clean
+	cd ../hmc5883 ; make clean
+	cd ../ms5611  ; make clean
+	cd ../gy86    ; make clean 
 
 .PHONY: install
 install:
