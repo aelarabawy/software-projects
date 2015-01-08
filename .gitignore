@@ -1,0 +1,10 @@
+#This file will include the rules for what files to be ignored by git in this project
+
+*.o
+*.a
+*.log
+.cproject
+gy-86/include/mpu60x0/*
+gy-86/include/ms5611/*
+gy-86/include/logger/*
+gy-g6/include/hmc5883/*
