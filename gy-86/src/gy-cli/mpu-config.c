@@ -236,96 +236,10 @@ END:
 }
 
 
-
-
-#if 0
-
-	//Get the config
-	char *configStr = strtok(NULL, " ");
-	if (configStr != NULL){
-		uint8 configId = getConfigId(configStr);
-		if (configId == CONFIG_INVALID) {
-			ERROR("Invalid Config %s", configStr);
-			goto END;
-		}
-
-		//Execute the corresponding Function
-		getConfigHandlers[configId]();
-	} else {
-		ERROR("No Config name in param String");
-		goto END;
-	}
-
-	switch (chip) {
-	case CHIP_TYPE_MPU60X0:
-
-		break;
-
-	case CHIP_TYPE_MPU60X0:
-		break;
-
-	case CHIP_TYPE_MPU60X0:
-		break;
-
-	default:
-		ERROR("Invalid Chip type ");
-	}
-
-
-	if (chip == CHIP_TYPE_MPU60X0) {
-		//Get the part to reset (or all)
-		char *token = strtok(NULL, " ");
-		if (token != NULL){
-			mode = mpu60x0_parseResetMode(token);
-
-			if (mode == RESET_MODE_INVALID) {
-				ERROR("Invalid Reset Mode ...Exiting");
-				goto END;
-			}
-		}
-	}
-
-	retcode retVal = gy86_Reset(g_gyHandle, chip, mode);
-	if (retVal) {
-		ERROR("Failed to Reset the GY-86 Module chips");
-		goto END;
-	}
-#endif
-
-
-
-#if 0
-//Getting the Parameter Name
-char *param = strtok(NULL, "=");
-if (param != NULL){
-	INFO("Parameter Name is BEGIN%sEND" , param);
-} else {
-	ERROR("No Parameter Name Passed");
-	goto END;
-}
-
-//Get the chip to start
-token = strtok(NULL, " ");
-if (token != NULL){
-	INFO("Passed argument is %s", token);
-}
-
-	//Get the Argument of the command
-	token = strtok(NULL," ");
-	if (token != NULL){
-		func1 (token);
-	} else {
-		printf("Invalid Entry, argument not provided\n");
-	}
-#endif
-
-
-
 static retcode handle_get_i2c_addr (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	//Gy86 *gy = (Gy86 *)g_gyHandle;
 	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_I2cAddr addr;
 
@@ -350,18 +264,18 @@ static retcode handle_get_clk_src (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char clkStr [100];
 	Mpu60x0_ClkSrc clk;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		clk = mpu60x0_GetClkSrc(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertClkSrc2String(clk, &clkStr);
+		clk = mpu60x0_GetClkSrc(mpu, src);
+		retVal = mpu60x0_ConvertClkSrc2String(clk, (char **)&clkStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into an CLK Src", clk);
 			PRINT_CLI("ERROR: Failed to convert %d into an CLK src", clk);
@@ -381,19 +295,19 @@ static retcode handle_get_smpl_rate (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	uint32 rate;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		rate = mpu60x0_GetSamplingRate(gy->m_mpu, src);
+		rate = mpu60x0_GetSamplingRate(mpu, src);
 
 		INFO("MPU Sampling Rate = %d",rate);
-		PRINT_CLI("MPU Sampling Rate = %d",rate);
+		PRINT_CLI("MPU Sampling Rate = %d",(int)rate);
 	}
 
 END:
@@ -405,18 +319,18 @@ static retcode handle_get_lpf (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char lpfStr [100];
 	Mpu60x0_Lpf lpf;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		lpf = mpu60x0_GetLpf(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertLpf2String(lpf, &lpfStr);
+		lpf = mpu60x0_GetLpf(mpu, src);
+		retVal = mpu60x0_ConvertLpf2String(lpf, (char **)&lpfStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into a LPF Value", lpf);
 			PRINT_CLI("ERROR: Failed to convert %d into a LPF value", lpf);
@@ -436,18 +350,18 @@ static retcode handle_get_acc_fsr (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char fsrStr [100];
 	Mpu60x0_AccFullScale fsr;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		fsr = mpu60x0_GetAccFullScale(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertAccFsr2String(fsr, &fsrStr);
+		fsr = mpu60x0_GetAccFullScale(mpu, src);
+		retVal = mpu60x0_ConvertAccFsr2String(fsr, (char **)&fsrStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into a Accelerometer Full Scale Range Value", fsr);
 			PRINT_CLI("ERROR: Failed to convert %d into a Accelerometer Full Scale Range value", fsr);
@@ -467,18 +381,18 @@ static retcode handle_get_gyro_fsr (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char fsrStr [100];
 	Mpu60x0_GyroFullScale fsr;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		fsr = mpu60x0_GetGyroFullScale(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertGyroFsr2String(fsr, &fsrStr);
+		fsr = mpu60x0_GetGyroFullScale(mpu, src);
+		retVal = mpu60x0_ConvertGyroFsr2String(fsr, (char **)&fsrStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into a Gyroscope Full Scale Range Value", fsr);
 			PRINT_CLI("ERROR: Failed to convert %d into a Gyroscope Full Scale Range value", fsr);
@@ -498,16 +412,16 @@ static retcode handle_get_fifo_enable (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool fifo;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		fifo = mpu60x0_GetFifoUsage(gy->m_mpu, src);
+		fifo = mpu60x0_GetFifoUsage(mpu, src);
 		if (fifo) {
 			INFO("MPU FIFO is Enabled");
 			PRINT_CLI("MPU FIFO is Enabled");
@@ -526,16 +440,16 @@ static retcode handle_get_mot_det_thr (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	uint8 thr;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		thr = mpu60x0_GetMotDetThr(gy->m_mpu, src);
+		thr = mpu60x0_GetMotDetThr(mpu, src);
 
 		INFO("MPU Motion Detection Threshold = %d",thr);
 		PRINT_CLI("MPU Motion Detection Threshold = %d",thr);
@@ -550,10 +464,10 @@ static retcode handle_get_acc_enable (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	uint8 sensors;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -561,7 +475,7 @@ static retcode handle_get_acc_enable (ConfigDataSrc src) {
 	}
 
 
-	sensors = mpu60x0_GetActiveSensors(gy->m_mpu, src);
+	sensors = mpu60x0_GetActiveSensors(mpu, src);
 	sensors &= SENSOR_ACC_ALL;
 	INFO("Accelerometer Support is 0x%x", sensors);
 	PRINT_CLI("Accelerometer Support is 0x%x", sensors);
@@ -575,17 +489,17 @@ static retcode handle_get_gyro_enable (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	uint8 sensors;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	}
 
-	sensors = mpu60x0_GetActiveSensors(gy->m_mpu, src);
+	sensors = mpu60x0_GetActiveSensors(mpu, src);
 	sensors &= SENSOR_GYRO_ALL;
 	sensors >>= 3;
 	INFO("Gyroscope Support is 0x%x", sensors);
@@ -600,17 +514,17 @@ static retcode handle_get_temp_enable (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	uint8 sensors;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	}
 
-	sensors = mpu60x0_GetActiveSensors(gy->m_mpu, src);
+	sensors = mpu60x0_GetActiveSensors(mpu, src);
 	if (sensors & SENSOR_TEMP) {
 		INFO("Temperature Sensor is Supported");
 		PRINT_CLI("Temperature Sensor is Supported");
@@ -628,21 +542,21 @@ static retcode handle_get_int_lvl (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char lvlStr [100];
 	Mpu60x0_IntLvl lvl;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		lvl = mpu60x0_GetIntLvl(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertIntLvl2String(lvl, &lvlStr);
+		lvl = mpu60x0_GetIntLvl(mpu, src);
+		retVal = mpu60x0_ConvertIntLvl2String(lvl, (char **)&lvlStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into an Interrupt Level ", lvl);
-			PRINT_CLI("ERROR: Failed to convert %d into an Interrupt Level ", fsr);
+			PRINT_CLI("ERROR: Failed to convert %d into an Interrupt Level ", lvl);
 			goto END;
 		}
 
@@ -659,16 +573,16 @@ static retcode handle_get_int_open (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool isOpen;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		isOpen = mpu60x0_GetIntOpen(gy->m_mpu, src);
+		isOpen = mpu60x0_GetIntOpenDrain(mpu, src);
 		if (isOpen) {
 			INFO("Interrupt Signal is Open Drain");
 			PRINT_CLI("Interrupt Signal is Open Drain");
@@ -687,16 +601,16 @@ static retcode handle_get_int_latch (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool isLatch;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		isLatch = mpu60x0_GetIntLatch(gy->m_mpu, src);
+		isLatch = mpu60x0_GetIntLatch(mpu, src);
 		if (isLatch) {
 			INFO("Interrupt Signal is Latched until cleared");
 			PRINT_CLI("Interrupt Signal is Latched until cleared");
@@ -715,16 +629,16 @@ static retcode handle_get_int_clear_on_read (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool clearOnRead;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		clearOnRead = mpu60x0_GetIntClearOnRead(gy->m_mpu, src);
+		clearOnRead = mpu60x0_GetIntClearOnRead(mpu, src);
 		if (clearOnRead) {
 			INFO("Interrupt Signal is Cleared on any Register read");
 			PRINT_CLI("Interrupt Signal is Cleared on any Register read");
@@ -743,18 +657,18 @@ static retcode handle_get_aux_i2c_mode (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char modeStr [100];
 	Mpu60x0_AuxI2cMode mode;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		mode = mpu60x0_GetAuxI2c(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertAuxI2cMode2String(mode, &modeStr);
+		mode = mpu60x0_GetAuxI2c(mpu, src);
+		retVal = mpu60x0_ConvertAuxI2cMode2String(mode, (char **)&modeStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into a Auxiliary I2C Mode Value", mode);
 			PRINT_CLI("ERROR: Failed to convert %d into a Auxiliary I2C Mode value", mode);
@@ -774,18 +688,18 @@ static retcode handle_get_aux_i2c_clk (ConfigDataSrc src) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	char clkStr [100];
 	Mpu60x0_AuxI2cClk clk;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		clk = mpu60x0_GetAuxI2cClk(gy->m_mpu, src);
-		retVal = mpu60x0_ConvertAuxI2cClk2String(clk, &clkStr);
+		clk = mpu60x0_GetAuxI2cClk(mpu, src);
+		retVal = mpu60x0_ConvertAuxI2cClk2String(clk, (char **)&clkStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into a Auxiliary I2C Clk Value", clk);
 			PRINT_CLI("ERROR: Failed to convert %d into a Auxiliary I2C Clk value", clk);
@@ -806,10 +720,10 @@ static retcode handle_set_i2c_addr (char *addrStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_I2cAddr addr;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -823,7 +737,7 @@ static retcode handle_set_i2c_addr (char *addrStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetI2cAddr(gy->m_mpu, addr);
+		retVal = mpu60x0_SetI2cAddr(mpu, addr);
 		if (retVal) {
 			ERROR("Failed to set the I2C Address ");
 			PRINT_CLI("ERROR: Failed to set the I2C Address ");
@@ -843,10 +757,10 @@ static retcode handle_set_clk_src (char *clkStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_ClkSrc clk;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -860,7 +774,7 @@ static retcode handle_set_clk_src (char *clkStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetClkSrc(gy->m_mpu, clk);
+		retVal = mpu60x0_SetClkSrc(mpu, clk);
 		if (retVal) {
 			ERROR("Failed to set the Clock Source ");
 			PRINT_CLI("ERROR: Failed to set the Clock Source ");
@@ -880,18 +794,18 @@ static retcode handle_set_smpl_rate (char *rateStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	uint32 rate;
 	char *endPtr;
 	Mpu60x0_Lpf lpf;
 
-	if (!gy->m_mpu) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		lpf = mpu60x0_GetLpf(gy->m_mpu, DATA_SRC_CONFIG);
+		lpf = mpu60x0_GetLpf(mpu, DATA_SRC_CONFIG);
 		rate = (uint32) strtol(rateStr, &endPtr, 10);
 		if (endPtr == rateStr) {
 			ERROR("Invalid value for Sampling rate %s", rateStr);
@@ -900,9 +814,9 @@ static retcode handle_set_smpl_rate (char *rateStr) {
 			goto END;
 		}
 
-		rate = mpu60x0_SetSamplingRate(gy->m_mpu, rate, lpf);
+		rate = mpu60x0_SetSamplingRate(mpu, rate, lpf);
 		INFO("Setting the Sampling Rate for the MPU-60X0 Chip to %d", rate);
-		PRINT_CLI("Setting the Sampling Rate for the MPU-60X0 Chip to %d", rate);
+		PRINT_CLI("Setting the Sampling Rate for the MPU-60X0 Chip to %d", (int)rate);
 	}
 
 END:
@@ -914,10 +828,10 @@ static retcode handle_set_lpf (char *lpfStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_Lpf lpf;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -931,7 +845,7 @@ static retcode handle_set_lpf (char *lpfStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetLpf(gy->m_mpu, lpf);
+		retVal = mpu60x0_SetLpf(mpu, lpf);
 		if (retVal) {
 			ERROR("Failed to set the LPF ");
 			PRINT_CLI("ERROR: Failed to set the LPF ");
@@ -951,10 +865,10 @@ static retcode handle_set_acc_fsr (char *fsrStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_GyroFullScale fsr;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -968,7 +882,7 @@ static retcode handle_set_acc_fsr (char *fsrStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetGyroFullScale(gy->m_mpu, fsr);
+		retVal = mpu60x0_SetGyroFullScale(mpu, fsr);
 		if (retVal) {
 			ERROR("Failed to set the Gyro FSR ");
 			PRINT_CLI("ERROR: Failed to set the Gyro FSR ");
@@ -988,10 +902,10 @@ static retcode handle_set_gyro_fsr (char *fsrStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_AccFullScale fsr;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1005,7 +919,7 @@ static retcode handle_set_gyro_fsr (char *fsrStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetAccFullScale(gy->m_mpu, fsr);
+		retVal = mpu60x0_SetAccFullScale(mpu, fsr);
 		if (retVal) {
 			ERROR("Failed to set the ACC FSR ");
 			PRINT_CLI("ERROR: Failed to set the ACC FSR ");
@@ -1025,10 +939,10 @@ static retcode handle_set_fifo_enable (char *fifoStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool fifo;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1040,7 +954,7 @@ static retcode handle_set_fifo_enable (char *fifoStr) {
 			fifo = FALSE;
 		}
 
-		retVal = mpu60x0_SetFifoUsage(gy->m_mpu, fifo);
+		retVal = mpu60x0_SetFifoUsage(mpu, fifo);
 		if (retVal) {
 			ERROR("Failed to Enable/Disable the FIFO ");
 			PRINT_CLI("ERROR: Failed to Enable/Disable the FIFO ");
@@ -1056,22 +970,22 @@ END:
 	return retVal;
 }
 
-static retcode handle_set_mot_det_thr (char *) {
+static retcode handle_set_mot_det_thr (char *thrStr) {
 	//TODO
 	return 0;
 }
-static retcode handle_set_acc_enable (char *) {
+static retcode handle_set_acc_enable (char *enableStr) {
 	//TODO
 
 	return 0;
 }
 
-static retcode handle_set_gyro_enable (char *) {
+static retcode handle_set_gyro_enable (char *enableStr) {
 	//TODO
 	return 0;
 }
 
-static retcode handle_set_temp_enable (char *) {
+static retcode handle_set_temp_enable (char *enableStr) {
 	//TODO
 	return 0;
 }
@@ -1081,10 +995,10 @@ static retcode handle_set_int_lvl (char *lvlStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_IntLvl lvl;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1098,7 +1012,7 @@ static retcode handle_set_int_lvl (char *lvlStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetIntSignalLvl(gy->m_mpu, lvl);
+		retVal = mpu60x0_SetIntSignalLvl(mpu, lvl);
 		if (retVal) {
 			ERROR("Failed to set the Interrupt Signal Level ");
 			PRINT_CLI("ERROR: Failed to set the Interrupt Signal Level ");
@@ -1119,10 +1033,10 @@ static retcode handle_set_int_open (char *openStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool isOpen;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1134,7 +1048,7 @@ static retcode handle_set_int_open (char *openStr) {
 			isOpen = FALSE;
 		}
 
-		retVal = mpu60x0_SetIntOpenDrain(gy->m_mpu, isOpen);
+		retVal = mpu60x0_SetIntOpenDrain(mpu, isOpen);
 		if (retVal) {
 			ERROR("Failed to set the Open Drain Flag for the Interrupt Signal ");
 			PRINT_CLI("ERROR: Failed to set the Open Drain Flag for the Interrupt Signal ");
@@ -1154,10 +1068,10 @@ static retcode handle_set_int_latch (char *latchStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool latch;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1169,7 +1083,7 @@ static retcode handle_set_int_latch (char *latchStr) {
 			latch = FALSE;
 		}
 
-		retVal = mpu60x0_SetIntLatch(gy->m_mpu, latch);
+		retVal = mpu60x0_SetIntLatch(mpu, latch);
 		if (retVal) {
 			ERROR("Failed to set the Latch Flag for the Interrupt Signal ");
 			PRINT_CLI("ERROR: Failed to set the Latch Flag for the Interrupt Signal ");
@@ -1189,10 +1103,10 @@ static retcode handle_set_int_clear_on_read (char *clearStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	bool clearOnRead;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1204,7 +1118,7 @@ static retcode handle_set_int_clear_on_read (char *clearStr) {
 			clearOnRead = FALSE;
 		}
 
-		retVal = mpu60x0_SetIntClearOnRead(gy->m_mpu, clearOnRead);
+		retVal = mpu60x0_SetIntClearOnRead(mpu, clearOnRead);
 		if (retVal) {
 			ERROR("Failed to set the Clear on Read Flag for the Interrupt Signal ");
 			PRINT_CLI("ERROR: Failed to set the Clear on Read Flag for the Interrupt Signal ");
@@ -1224,10 +1138,10 @@ static retcode handle_set_aux_i2c_mode (char *modeStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_AuxI2cMode mode;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1241,7 +1155,7 @@ static retcode handle_set_aux_i2c_mode (char *modeStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetAuxI2c(gy->m_mpu, mode);
+		retVal = mpu60x0_SetAuxI2c(mpu, mode);
 		if (retVal) {
 			ERROR("Failed to set the Auxiliary I2C Bus Mode ");
 			PRINT_CLI("ERROR: Failed to set the Auxiliary I2C Bus Mode ");
@@ -1262,10 +1176,10 @@ static retcode handle_set_aux_i2c_clk (char *clkStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	mpuHandle mpu = gy86_getMpuChipHandle(g_gyHandle);
 	Mpu60x0_AuxI2cClk clk;
 
-	if (!gy->m_ms) {
+	if (!mpu) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -1279,7 +1193,7 @@ static retcode handle_set_aux_i2c_clk (char *clkStr) {
 			goto END;
 		}
 
-		retVal = mpu60x0_SetAuxI2cClk(gy->m_mpu, clk);
+		retVal = mpu60x0_SetAuxI2cClk(mpu, clk);
 		if (retVal) {
 			ERROR("Failed to set the Auxiliary I2C Bus Clock Speed ");
 			PRINT_CLI("ERROR: Failed to set the Auxiliary I2C Bus Clock Speed ");

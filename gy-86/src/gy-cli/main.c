@@ -19,6 +19,7 @@ static retcode handle_gy86_update (void);
 static retcode handle_gy86_reset (void);
 static retcode handle_gy86_get (void);
 static retcode handle_gy86_set (void);
+static retcode handle_gy86_read (void);
 
 /**
  * Internal Functions for specific chips
@@ -46,6 +47,7 @@ char *commands[] = {"gy-init" ,
 					"gy-reset",
 					"gy-get",
 					"gy-set",
+					"gy-read",
                     "LAST_COMMAND"};
 
 
@@ -56,7 +58,8 @@ retcode (*commandHandlers[])(void)  = {handle_gy86_init,
 									   handle_gy86_update,
 									   handle_gy86_reset,
 							           handle_gy86_get,
-							           handle_gy86_set};
+							           handle_gy86_set,
+									   handle_gy86_read};
 
 //main function
 int main (int argc, char* argv[]) {
@@ -401,3 +404,28 @@ END:
 }
 
 
+static retcode handle_gy86_read (void) {
+	ENTER();
+
+	retcode retVal = 0;
+
+	PROGRESS("Handling gy86-read Command ");
+
+	//Get the chips to update
+	Gy86_ChipType chip = getChipType(" ");
+	if (chip == CHIP_TYPE_INVALID) {
+		ERROR("Invalid Chip Name ... Exiting");
+		retVal = -1;
+		goto END;
+	}
+
+	retVal = gy86_Read(g_gyHandle, chip);
+	if (retVal) {
+		ERROR("Failed to Read the GY-86 Module chips");
+		goto END;
+	}
+
+END:
+	EXIT();
+	return retVal;
+}

@@ -283,6 +283,28 @@ END:
 	return ms5611->m_i2cAddr;
 }
 
+Ms5611_I2cAddr ms5611_ParseI2cAddr(char *addrStr) {
+
+	ENTER();
+
+	Ms5611_I2cAddr addr;
+
+	if (strcmp(addrStr, "low") == 0) {
+		addr = I2C_ADDR_CSB_LOW;
+	} else if (strcmp(addrStr, "high") == 0) {
+		addr = I2C_ADDR_CSB_HIGH;
+	} else {
+		ERROR("Invalid I2C Address %s", addrStr);
+		addr = I2C_ADDR_CSB_INVALID;
+		goto END;
+	}
+
+END:
+	EXIT();
+	return addr;
+}
+
+
 /**
  * Retrieving the Chip PROM Data
  */

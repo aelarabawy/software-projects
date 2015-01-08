@@ -174,17 +174,17 @@ static retcode handle_get_i2c_addr (void) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint8 addr;
 
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		addr = ms5611_GetI2cAddr(gy->m_ms);
+		addr = ms5611_GetI2cAddr(ms);
 		INFO("I2C Address is 0x%x", addr);
 		PRINT_CLI("I2C Address is 0x%x", addr);
 	}
@@ -198,16 +198,16 @@ static retcode handle_get_sens (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint16 sens;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		sens = ms5611_GetPressureSens(gy->m_ms);
+		sens = ms5611_GetPressureSens(ms);
 		INFO("Pressure Sensitivity(SENS) = %d",sens);
 		PRINT_CLI("Pressure Sensitivity(SENS) = %d",sens);
 	}
@@ -221,17 +221,17 @@ static retcode handle_get_off (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint16 off;
 
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		off = ms5611_GetPressureOffset(gy->m_ms);
+		off = ms5611_GetPressureOffset(ms);
 		INFO("Pressure Offset (OFF) = %d" ,off);
 		PRINT_CLI("Pressure Offset (OFF) = %d" ,off);
 	}
@@ -245,16 +245,16 @@ static retcode handle_get_tcs (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint16 tcs;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		tcs = ms5611_GetTempCoffPressureSens(gy->m_ms);
+		tcs = ms5611_GetTempCoffPressureSens(ms);
 		INFO("Temperature Coefficient of Pressure Sensitivity (TCS) = %d",tcs);
 		PRINT_CLI("Temperature Coefficient of Pressure Sensitivity (TCS) = %d",tcs);
 	}
@@ -268,16 +268,16 @@ static retcode handle_get_tco (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint16 tco;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		tco = ms5611_GetTempCoffPressureOffset(gy->m_ms);
+		tco = ms5611_GetTempCoffPressureOffset(ms);
 		INFO("Temperature Coefficient of Pressure Offset(TCO) = %d",tco);
 		PRINT_CLI("Temperature Coefficient of Pressure Offset (TCO) = %d",tco);
 	}
@@ -291,16 +291,16 @@ static retcode handle_get_tref (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint16 tref;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		tref = ms5611_GetRefTemp(gy->m_ms);
+		tref = ms5611_GetRefTemp(ms);
 		INFO("Reference Temperature (TREF) = %d",tref);
 		PRINT_CLI("Reference Temperature (TREF) = %d",tref);
 	}
@@ -314,16 +314,16 @@ static retcode handle_get_tempsens (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	uint16 tempsens;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("ERROR: MS chip is not initialized");
 		PRINT_CLI("MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		tempsens = ms5611_GetTempCoffTemp(gy->m_ms);
+		tempsens = ms5611_GetTempCoffTemp(ms);
 		INFO("Temperature Coefficient of Temperature Sensitivity (TEMPSENS) = %d",tempsens);
 		PRINT_CLI("Temperature Coefficient of Temperature Sensitivity (TEMPSENS) = %d",tempsens);
 	}
@@ -337,18 +337,18 @@ static retcode handle_get_pOsr (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	char osrStr [100];
 	Ms5611_Osr osr;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		osr = ms5611_GetPressureOsr(gy->m_ms);
-		retVal = ms5611_ConvertOsr2String(osr, &osrStr);
+		osr = ms5611_GetPressureOsr(ms);
+		retVal = ms5611_ConvertOsr2String(osr, (char **)&osrStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into an OSR Value", osr);
 			PRINT_CLI("ERROR: Failed to convert %d into an OSR Value", osr);
@@ -368,19 +368,18 @@ static retcode handle_get_tempOsr (void)  {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	char osrStr [100];
-	msHandle handle = gy->m_ms;
 	Ms5611_Osr osr;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
 		goto END;
 	} else {
-		osr = ms5611_GetTempOsr(gy->m_ms);
-		retVal = ms5611_ConvertOsr2String(osr, &osrStr);
+		osr = ms5611_GetTempOsr(ms);
+		retVal = ms5611_ConvertOsr2String(osr, (char **)&osrStr);
 		if (retVal) {
 			ERROR("Failed to convert %d into an OSR Value", osr);
 			PRINT_CLI("ERROR: Failed to convert %d into an OSR Value", osr);
@@ -401,10 +400,10 @@ static retcode handle_set_i2c_addr (char *addrStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	Ms5611_I2cAddr addr;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -418,7 +417,7 @@ static retcode handle_set_i2c_addr (char *addrStr) {
 			goto END;
 		}
 
-		retVal = ms5611_SetI2cAddr(gy->m_ms, addr);
+		retVal = ms5611_SetI2cAddr(ms, addr);
 		if (retVal) {
 			ERROR("Failed to set I2C Address");
 			PRINT_CLI("ERROR: Failed to set I2C Address");
@@ -434,7 +433,7 @@ END:
 	return retVal;
 }
 
-static retcode handle_set_sens (char *str) {
+static retcode handle_set_sens (char *sensStr) {
 	ENTER();
 
 	retcode retVal = -1;
@@ -442,12 +441,11 @@ static retcode handle_set_sens (char *str) {
 	ERROR("Can not Set SENS ... This is a read only parameter");
 	PRINT_CLI("ERROR: Can not Set SENS ... This is a read only parameter");
 
-END:
 	EXIT();
 	return retVal;
 }
 
-static retcode handle_set_off (char *str) {
+static retcode handle_set_off (char *offStr) {
 	ENTER();
 
 	retcode retVal = -1;
@@ -455,12 +453,11 @@ static retcode handle_set_off (char *str) {
 	ERROR("Can not Set OFF ... This is a read only parameter");
 	PRINT_CLI("ERROR: Can not Set OFF ... This is a read only parameter");
 
-END:
 	EXIT();
 	return retVal;
 }
 
-static retcode handle_set_tcs (char *) {
+static retcode handle_set_tcs (char *tcsStr) {
 	ENTER();
 
 	retcode retVal = -1;
@@ -468,12 +465,11 @@ static retcode handle_set_tcs (char *) {
 	ERROR("Can not Set TCS ... This is a read only parameter");
 	PRINT_CLI("ERROR: Can not Set TCS ... This is a read only parameter");
 
-END:
 	EXIT();
 	return retVal;
 }
 
-static retcode handle_set_tco (char *) {
+static retcode handle_set_tco (char *tcoStr) {
 	ENTER();
 
 	retcode retVal = -1;
@@ -481,12 +477,11 @@ static retcode handle_set_tco (char *) {
 	ERROR("Can not Set TCO ... This is a read only parameter");
 	PRINT_CLI("ERROR: Can not Set TCO ... This is a read only parameter");
 
-END:
 	EXIT();
 	return retVal;
 }
 
-static retcode handle_set_tref (char *) {
+static retcode handle_set_tref (char *trefStr) {
 	ENTER();
 
 	retcode retVal = -1;
@@ -494,12 +489,11 @@ static retcode handle_set_tref (char *) {
 	ERROR("Can not Set TREF ... This is a read only parameter");
 	PRINT_CLI("ERROR: Can not Set TREF ... This is a read only parameter");
 
-END:
 	EXIT();
 	return retVal;
 }
 
-static retcode handle_set_tempsens (char *) {
+static retcode handle_set_tempsens (char *tempsensStr) {
 	ENTER();
 
 	retcode retVal = -1;
@@ -507,7 +501,6 @@ static retcode handle_set_tempsens (char *) {
 	ERROR("Can not Set TEMPSENS ... This is a read only parameter");
 	PRINT_CLI("ERROR: Can not Set TEMPSENS ... This is a read only parameter");
 
-END:
 	EXIT();
 	return retVal;
 }
@@ -516,10 +509,10 @@ static retcode handle_set_pOsr (char *osrStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	Ms5611_Osr osr;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -533,7 +526,7 @@ static retcode handle_set_pOsr (char *osrStr) {
 			goto END;
 		}
 
-		retVal = ms5611_SetPressureOsr(gy->m_ms, osr);
+		retVal = ms5611_SetPressureOsr(ms, osr);
 		if (retVal) {
 			ERROR("Failed to set the Pressure OSR ");
 			PRINT_CLI("ERROR: Failed to set the Pressure OSR ");
@@ -553,10 +546,10 @@ static retcode handle_set_tempOsr (char *osrStr) {
 	ENTER();
 
 	retcode retVal = 0;
-	Gy86 *gy = (Gy86 *)g_gyHandle;
+	msHandle ms = gy86_getMsChipHandle(g_gyHandle);
 	Ms5611_Osr osr;
 
-	if (!gy->m_ms) {
+	if (!ms) {
 		ERROR("MS chip is not initialized");
 		PRINT_CLI("ERROR: MS chip is not initialized");
 		retVal = -1;
@@ -570,7 +563,7 @@ static retcode handle_set_tempOsr (char *osrStr) {
 			goto END;
 		}
 
-		retVal = ms5611_SetTempOsr(gy->m_ms, osr);
+		retVal = ms5611_SetTempOsr(ms, osr);
 		if (retVal) {
 			ERROR("Failed to set the Temperature OSR ");
 			PRINT_CLI("ERROR: Failed to set the Temperature OSR ");

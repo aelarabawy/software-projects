@@ -100,15 +100,6 @@ typedef enum {
 	INT_LVL_ACTIVE_LOW
 } Mpu60x0_IntLvl;
 
-/**
- * Configuration for the Interrupt Signal
- */
-typedef struct {
-	Mpu60x0_IntLvl m_intLvl;
-    bool m_isOpenDrain;
-    bool m_isLatchOn;
-    bool m_clearOnAnyRead;
-} Mpu60x0_IntSignalConfig;
 
 /**
  * Sensor Ids

@@ -65,6 +65,11 @@ retcode gy86_Update (gyHandle, const Gy86_ChipType);
 
 
 /**
+ * This function will read the sensor data of the selected chip
+ */
+retcode gy86_Read(gyHandle, const Gy86_ChipType);
+
+/**
  * A getter to the chip handlers
  */
 mpuHandle gy86_getMpuChipHandle (gyHandle);

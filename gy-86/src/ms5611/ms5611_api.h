@@ -72,7 +72,7 @@ retcode ms5611_Update (msHandle);
  */
 retcode ms5611_SetI2cAddr (msHandle, const Ms5611_I2cAddr);
 uint8 ms5611_GetI2cAddr (msHandle);
-
+Ms5611_I2cAddr ms5611_ParseI2cAddr(char *);
 
 /**
  * Retrieving the Chip PROM Data

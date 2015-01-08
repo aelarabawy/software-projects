@@ -157,14 +157,20 @@ uint8 mpu60x0_GetActiveSensors (mpuHandle, const ConfigDataSrc);
 /**
  * This function configures the Interrupt signal
  */
-retcode mpu60x0_ConfigIntSignal (mpuHandle, Mpu60x0_IntSignalConfig *);
+retcode mpu60x0_SetIntSignalLvl (mpuHandle, Mpu60x0_IntLvl);
 Mpu60x0_IntLvl mpu60x0_GetIntLvl (mpuHandle, const ConfigDataSrc);
-bool mpu60x0_GetIntOpen (mpuHandle, const ConfigDataSrc);
-bool mpu60x0_GetIntLatch (mpuHandle, const ConfigDataSrc);
-bool mpu60x0_GetIntClearOnRead (mpuHandle, const ConfigDataSrc);
-
 retcode mpu60x0_ConvertIntLvl2String(Mpu60x0_IntLvl, char **);
 Mpu60x0_IntLvl mpu60x0_ParseIntLvl (char *);
+
+retcode mpu60x0_SetIntOpenDrain (mpuHandle, bool);
+bool mpu60x0_GetIntOpenDrain (mpuHandle, const ConfigDataSrc);
+
+retcode mpu60x0_SetIntLatch (mpuHandle, bool);
+bool mpu60x0_GetIntLatch (mpuHandle, const ConfigDataSrc);
+
+retcode mpu60x0_SetIntClearOnRead (mpuHandle, bool);
+bool mpu60x0_GetIntClearOnRead (mpuHandle, const ConfigDataSrc);
+
 
 
 

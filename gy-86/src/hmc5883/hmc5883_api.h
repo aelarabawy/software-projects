@@ -116,12 +116,7 @@ retcode hmc5883_ReadSensorData (hmcHandle);
 
 
 /**
- * Get functions for Accelerometer/Gyroscope/Temperature data
- * The returned data will be scaled based on the scaling factor
- * This does not do any read from the Hardware,
- * instead, it just parses the internal data array
- * You need to call hmc5883_ReadSensorData() first to fill the array
- * if fresh sensor data are required
+ * This function reads the sensor data registers and return the values
  */
 retcode hmc5883_GetSensorData (hmcHandle, uint16 *, uint16 *, uint16 *);
 

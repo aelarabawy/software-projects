@@ -993,8 +993,8 @@ END:
 	return retVal;
 }
 
-retcode mpu60x0_ConfigIntSignal (mpuHandle handle,
-		                         Mpu60x0_IntSignalConfig *config) {
+retcode mpu60x0_SetIntSignalLvl (mpuHandle handle,
+		                         Mpu60x0_IntLvl lvl) {
 	ENTER();
 
 	Mpu60x0 *mpu = (Mpu60x0 *)handle;
@@ -1006,14 +1006,7 @@ retcode mpu60x0_ConfigIntSignal (mpuHandle handle,
 		goto END;
 	}
 
-	if (mpu->m_state != MPU60X0_STATE_INIT) {
-		WARN("MPU Started ....Changes will only take effect after a restart");
-	}
-
-	mpu->m_configs.m_intClearOnAnyRead = config->m_clearOnAnyRead;
-	mpu->m_configs.m_intIsLatchOn = config->m_isLatchOn;
-	mpu->m_configs.m_intIsOpenDrain = config->m_isOpenDrain;
-	mpu->m_configs.m_intLvl = config->m_intLvl;
+	mpu->m_configs.m_intLvl = lvl;
 
 END:
 	EXIT();
@@ -1048,96 +1041,6 @@ Mpu60x0_IntLvl mpu60x0_GetIntLvl (mpuHandle handle, const ConfigDataSrc dataSrc)
 END:
 	EXIT();
 	return lvl;
-}
-
-bool mpu60x0_GetIntOpen (mpuHandle handle, const ConfigDataSrc dataSrc) {
-	ENTER();
-
-	Mpu60x0 *mpu = (Mpu60x0 *)handle;
-	bool isOpen;
-
-	if (!mpu) {
-		NULL_POINTER("mpu");
-		goto END;
-	}
-
- 	switch (dataSrc) {
-	case DATA_SRC_CONFIG:
-		isOpen = mpu->m_configs.m_intIsOpenDrain;
-		break;
-
-	case DATA_SRC_ACTIVE:
-		isOpen = mpu->m_activeConfigs.m_intIsOpenDrain;
-		break;
-
-	case DATA_SRC_HW:
-		isOpen = getIsOpenDrainInt(mpu);
-		break;
-	}
-
-END:
-	EXIT();
-	return isOpen;
-}
-
-bool mpu60x0_GetIntLatch (mpuHandle handle, const ConfigDataSrc dataSrc) {
-	ENTER();
-
-	Mpu60x0 *mpu = (Mpu60x0 *)handle;
-	bool isLatch;
-
-	if (!mpu) {
-		NULL_POINTER("mpu");
-		goto END;
-	}
-
- 	switch (dataSrc) {
-	case DATA_SRC_CONFIG:
-		isLatch = mpu->m_configs.m_intIsLatchOn;
-		break;
-
-	case DATA_SRC_ACTIVE:
-		isLatch = mpu->m_activeConfigs.m_intIsLatchOn;
-		break;
-
-	case DATA_SRC_HW:
-		isLatch = getIsLatchInt(mpu);
-		break;
-	}
-
-END:
-	EXIT();
-	return isLatch;
-}
-
-bool mpu60x0_GetIntClearOnRead (mpuHandle handle, const ConfigDataSrc dataSrc) {
-	ENTER();
-
-	Mpu60x0 *mpu = (Mpu60x0 *)handle;
-	bool clearOnRead;
-
-	if (!mpu) {
-		NULL_POINTER("mpu");
-		goto END;
-	}
-
- 	switch (dataSrc) {
-	case DATA_SRC_CONFIG:
-		clearOnRead = mpu->m_configs.m_intClearOnAnyRead;
-		break;
-
-	case DATA_SRC_ACTIVE:
-		clearOnRead = mpu->m_activeConfigs.m_intClearOnAnyRead;
-		break;
-
-	case DATA_SRC_HW:
-		clearOnRead = getClearOnReadInt(mpu);
-		break;
-	}
-
-END:
-	EXIT();
-	return clearOnRead;
 }
 
 retcode mpu60x0_ConvertIntLvl2String(Mpu60x0_IntLvl lvl, char **pLvlStr) {
@@ -1192,6 +1095,159 @@ END:
 	EXIT();
 	return lvl;
 }
+
+retcode mpu60x0_SetIntOpenDrain (mpuHandle handle,
+		                         bool isOpen) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	retcode retVal = 0;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		retVal = -1;
+		goto END;
+	}
+
+	mpu->m_configs.m_intIsOpenDrain = isOpen;
+
+END:
+	EXIT();
+	return retVal;
+}
+
+bool mpu60x0_GetIntOpenDrain (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	bool isOpen;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		isOpen = mpu->m_configs.m_intIsOpenDrain;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		isOpen = mpu->m_activeConfigs.m_intIsOpenDrain;
+		break;
+
+	case DATA_SRC_HW:
+		isOpen = getIsOpenDrainInt(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return isOpen;
+}
+
+
+retcode mpu60x0_SetIntLatch (mpuHandle handle,
+		                     bool isLatch) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	retcode retVal = 0;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		retVal = -1;
+		goto END;
+	}
+
+	mpu->m_configs.m_intIsLatchOn = isLatch;
+
+END:
+	EXIT();
+	return retVal;
+}
+
+bool mpu60x0_GetIntLatch (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	bool isLatch;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		isLatch = mpu->m_configs.m_intIsLatchOn;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		isLatch = mpu->m_activeConfigs.m_intIsLatchOn;
+		break;
+
+	case DATA_SRC_HW:
+		isLatch = getIsLatchInt(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return isLatch;
+}
+
+retcode mpu60x0_SetIntClearOnRead (mpuHandle handle,
+		                           bool clearOnRead) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	retcode retVal = 0;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		retVal = -1;
+		goto END;
+	}
+
+	mpu->m_configs.m_intClearOnAnyRead = clearOnRead;
+
+END:
+	EXIT();
+	return retVal;
+}
+
+
+bool mpu60x0_GetIntClearOnRead (mpuHandle handle, const ConfigDataSrc dataSrc) {
+	ENTER();
+
+	Mpu60x0 *mpu = (Mpu60x0 *)handle;
+	bool clearOnRead;
+
+	if (!mpu) {
+		NULL_POINTER("mpu");
+		goto END;
+	}
+
+ 	switch (dataSrc) {
+	case DATA_SRC_CONFIG:
+		clearOnRead = mpu->m_configs.m_intClearOnAnyRead;
+		break;
+
+	case DATA_SRC_ACTIVE:
+		clearOnRead = mpu->m_activeConfigs.m_intClearOnAnyRead;
+		break;
+
+	case DATA_SRC_HW:
+		clearOnRead = getClearOnReadInt(mpu);
+		break;
+	}
+
+END:
+	EXIT();
+	return clearOnRead;
+}
+
 
 /**
  * Using FIFO

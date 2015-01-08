@@ -13,6 +13,15 @@
 
 //Internal Functions Prototypes
 static retcode resetGyData(Gy86 *);
+
+static void mpuDataRdyIntHandler (void *, uint32);
+static void mpuFifoIntHandler (void *, uint32);
+static void mpuMotDetIntHandler (void *, uint32);
+static void mpuFsyncIntHandler (void *, uint32);
+static void mpuAuxI2cIntHandler (void *, uint32);
+
+static void hmcDataRdyIntHandler (void *, uint32);
+static void hmcRegLockIntHandler (void *, uint32);
 //////////////////////////////
 
 /**
@@ -23,6 +32,7 @@ gyHandle gy86_Init (Gy86_ChipType chip) {
 
 	ENTER();
 
+	retcode retVal = 0;
 	Gy86 *gy = (Gy86 *)malloc(sizeof(Gy86));
 	if (!gy) {
 		ALLOC_FAIL("gy");
@@ -40,6 +50,33 @@ gyHandle gy86_Init (Gy86_ChipType chip) {
 		}
 	}
 
+	//Register the Interrupt Functions
+	retVal = mpu60x0_RegDataRdyCb (gy->m_mpu, mpuDataRdyIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the MPU:DataRdy");
+	}
+
+	retVal = mpu60x0_RegFifoOvrflowCb (gy->m_mpu, mpuFifoIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the MPU:FIFO");
+	}
+
+	retVal = mpu60x0_RegMotDetCb (gy->m_mpu, mpuMotDetIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the MPU:MotDet");
+	}
+
+	retVal = mpu60x0_RegFsynchCb (gy->m_mpu, mpuFsyncIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the MPU:Fsync");
+	}
+
+	retVal = mpu60x0_RegAuxI2cCb (gy->m_mpu, mpuAuxI2cIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the MPU:AuxI2c");
+	}
+
+
 	if (chip & CHIP_TYPE_HMC5883) {
 		gy->m_hmc = hmc5883_Init();
 		if (!gy->m_hmc) {
@@ -47,6 +84,18 @@ gyHandle gy86_Init (Gy86_ChipType chip) {
 			goto FAIL_HMC;
 		}
 	}
+
+	//Register the Interrupt Functions
+	retVal = hmc5883_RegDataRdyCb (gy->m_hmc, hmcDataRdyIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the HMC:DataRdy");
+	}
+
+	retVal = hmc5883_RegLockCb (gy->m_hmc, hmcRegLockIntHandler, (uint32)gy);
+	if (retVal) {
+		ERROR("Failed in Registering the Interrupt Handler for the HMC:Reg Lock");
+	}
+
 
 	if (chip & CHIP_TYPE_MS5611) {
 		gy->m_ms = ms5611_Init();
@@ -358,6 +407,65 @@ END:
 	return retVal;
 }
 
+retcode gy86_Read(gyHandle handle,
+                  const Gy86_ChipType chip) {
+	ENTER();
+
+	Gy86 *gy = (Gy86 *)handle;
+	retcode retVal = 0;
+
+	if (!gy) {
+		NULL_POINTER("gy");
+		retVal = -1;
+		goto END;
+	}
+
+	if (chip & CHIP_TYPE_MPU60X0) {
+		if (gy->m_mpu) {
+			//Trigger a reading
+
+			retVal = mpu60x0_Update(gy->m_mpu);
+			if (retVal) {
+				ERROR("Can not Update the MPU Chip");
+				goto END;
+			}
+		} else {
+			ERROR("Can not Update the MPU Chip, chip not initialized");
+			goto END;
+		}
+	}
+
+	if (chip & CHIP_TYPE_HMC5883) {
+		if (gy->m_hmc) {
+			retVal = hmc5883_Update(gy->m_hmc);
+			if (retVal) {
+				ERROR("Can not Update the HMC Chip");
+				goto END;
+			}
+		} else {
+			ERROR("Can not Update the HMC Chip, chip not initialized");
+			goto END;
+		}
+	}
+
+	if (chip & CHIP_TYPE_MS5611) {
+		if (gy->m_ms) {
+			retVal = ms5611_Update(gy->m_ms);
+			if (retVal) {
+				ERROR("Can not Update the MS Chip");
+				goto END;
+			}
+		} else {
+			ERROR("Can not Update the MS Chip, chip not initialized");
+			goto END;
+		}
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
 
 mpuHandle gy86_getMpuChipHandle (gyHandle handle) {
 	ENTER();
@@ -422,5 +530,138 @@ static retcode resetGyData(Gy86 *gy) {
 	return retVal;
 }
 
+static void mpuDataRdyIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)handle;
+	float accData[3];
+	float gyroData[3];
+	float tempData[1];
+
+	retVal = readMpuSensorData ((gyHandle)gy, accData, gyroData, tempData);
+	if (retVal) {
+		ERROR("Failed to Read the MPU Sensor Data");
+	}
+
+//END:
+	EXIT();
+	return;
+}
+
+static void mpuFifoIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	EXIT();
+	return;
+}
+
+static void mpuMotDetIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	EXIT();
+	return;
+}
+
+static void mpuFsyncIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	EXIT();
+	return;
+}
+
+static void mpuAuxI2cIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	EXIT();
+	return;
+}
 
 
+static void hmcDataRdyIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)handle;
+	uint16 data[3];
+
+
+	retVal = readHmcSensorData(gy, data);
+	if (retVal) {
+		ERROR("Failed to Collect the HMC Sensor Data");
+	} else {
+		INFO("Received Compass Sensor Data X = %d, Y= %d, Z=%d", data[0], data[1], data[2]);
+	}
+
+	EXIT();
+	return;
+}
+
+static void hmcRegLockIntHandler (void *handle, uint32 param) {
+	ENTER();
+
+	EXIT();
+	return;
+}
+
+
+static retcode readHmcSensorData ( gyHandle handle, uint16* data) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)handle;
+
+
+
+	retVal = hmc5883_GetSensorData(gy->m_hmc, &data[0], &data[1], &data[2]);
+	if (retVal) {
+		ERROR("Failed to Collect the HMC Sensor Data");
+		goto END;
+	} else {
+		INFO("Received Compass Sensor Data X = %d, Y= %d, Z=%d", data[0], data[1], data[2]);
+	}
+
+END:
+	EXIT();
+	return retVal;
+}
+
+static retcode readMpuSensorData ( gyHandle handle, float* accData, float* gyroData, float* tempData) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)handle;
+
+	//First collect the data from the sensor registers or FIFO
+	retVal = mpu60x0_ReadSensorData (gy->m_mpu);
+	if (retVal) {
+		ERROR("Failed to Collect the MPU Sensor Data");
+		goto END;
+	}
+
+	//Calling to get the data
+	retVal = mpu60x0_GetAccData(gy->m_mpu, &accData[0], &accData[1], &accData[2]);
+	if (retVal) {
+		ERROR("Failed to read Accelerometer Sensor Data");
+	} else {
+		INFO("Received Acc Sensor Data X = %d, Y= %d, Z=%d", accData[0], accData[1], data[2]);
+	}
+
+	retVal = mpu60x0_GetGyroData(gy->m_mpu, &gyroData[0], &gyroData[1], &gyroData[2]);
+	if (retVal) {
+		ERROR("Failed to read the Gyroscope Sensor Data");
+	} else {
+		INFO("Received Gyro Sensor Data X = %d, Y= %d, Z=%d", gyroData[0], gyroData[1], gyroData[2]);
+	}
+
+	retVal = mpu60x0_GetTempData (gy->m_mpu, &tempData[0]);
+	if (retVal) {
+		ERROR("Failed to read the Temperature Sensor Data");
+	} else {
+		INFO("Received Temperature Sensor Data Temp = %d", tempData[0]);
+	}
+
+//END:
+	EXIT();
+	return retVal;
+}

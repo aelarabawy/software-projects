@@ -46,32 +46,32 @@ $(OBJ_DIR)/%.o: %.c $(DEP)
 .PHONY: _logger
 _logger: force
 	echo "Building Logger++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	cd ../logger ; make ; make install
+	cd ../logger ; make ; make install ; make clean
 	echo "Finished Building Logger-------------------------------------------------------"
 
 .PHONY: _mpu60x0
 _mpu60x0: force
 	echo "Building MPU60X0+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	cd ../mpu60x0 ; make ; make install
+	cd ../mpu60x0 ; make ; make install ; make clean
 	echo "Finished Building MPU60X0------------------------------------------------------"
 	
 
 .PHONY: _ms5611
 _ms5611: force
 	echo "Building MS5611++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	cd ../ms5611 ; make ; make install
+	cd ../ms5611 ; make ; make install ; make clean
 	echo "Finished Building MS5611-------------------------------------------------------"
 
 .PHONY: _hmc5883
 _hmc5883: force
 	echo "Building HMC5883++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	cd ../hmc5883 ; make ; make install
+	cd ../hmc5883 ; make ; make install ; make clean
 	echo "Finished Building HMC5883-----------------------------------------------------"
 
 .PHONY: _gy86
 _gy86: force
 	echo "Building GY86+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	cd ../gy86 ; make ; make install
+	cd ../gy86 ; make ; make install ; make clean
 	echo "Finished Building GY86--------------------------------------------------------"
 
 .PHONY: clean
