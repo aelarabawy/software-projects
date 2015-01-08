@@ -22,6 +22,10 @@ static void mpuAuxI2cIntHandler (void *, uint32);
 
 static void hmcDataRdyIntHandler (void *, uint32);
 static void hmcRegLockIntHandler (void *, uint32);
+
+static retcode readMpuSensorData (gyHandle, float*, float*, float*);
+static retcode readHmcSensorData (gyHandle, uint16*);
+static retcode readMsSensorData ( gyHandle, float*, float*);
 //////////////////////////////
 
 /**
@@ -422,42 +426,76 @@ retcode gy86_Read(gyHandle handle,
 
 	if (chip & CHIP_TYPE_MPU60X0) {
 		if (gy->m_mpu) {
-			//Trigger a reading
+			float accData[3];
+			float gyroData[3];
+			float tempData[1];
 
-			retVal = mpu60x0_Update(gy->m_mpu);
+			retVal = readMpuSensorData (handle, accData, gyroData, tempData);
 			if (retVal) {
-				ERROR("Can not Update the MPU Chip");
+				ERROR("Can not Read the MPU Chip Sensors");
 				goto END;
+			} else {
+				INFO("Reading MPU Chip Data: ");
+				INFO("Accelerometer Data: X = %f , Y = %f, Z = %f", accData[0], accData[1], accData[2]);
+				INFO("Gyroscope Data: X = %f , Y = %f, Z = %f", gyroData[0], gyroData[1], gyroData[2]);
+				INFO("Temperature Data: T = %f", tempData[0]);
 			}
-		} else {
-			ERROR("Can not Update the MPU Chip, chip not initialized");
-			goto END;
 		}
 	}
 
 	if (chip & CHIP_TYPE_HMC5883) {
 		if (gy->m_hmc) {
-			retVal = hmc5883_Update(gy->m_hmc);
-			if (retVal) {
-				ERROR("Can not Update the HMC Chip");
-				goto END;
+			uint16 compData[3];
+
+			//First check the mode of operation for the chip
+			Hmc5883_OperMode mode;
+			mode = hmc5883_GetOperMode(gy->m_hmc, DATA_SRC_ACTIVE);
+			switch (mode) {
+			case OPER_MODE_IDLE:
+			case OPER_MODE_SINGLE:
+				//Trigger a reading
+				retVal = hmc5883_ReadSensorData (gy->m_hmc);
+				if (retVal) {
+					ERROR("Failed to Trigger a reading in the NMC Chip");
+				}
+
+				break;
+
+			case OPER_MODE_CONT:
+				retVal = 0;
+				//Nothing to do
+				break;
+
+			default:
+				ERROR("Invalid MS Chip Operating Mode %d", mode);
+				retVal = -1;
 			}
-		} else {
-			ERROR("Can not Update the HMC Chip, chip not initialized");
-			goto END;
+
+			if (!retVal) {
+				retVal = readHmcSensorData (handle, compData);
+				if (retVal) {
+					ERROR("Can not Read the HMC Chip Sensors");
+					goto END;
+				} else {
+					INFO("Reading HMC Chip Data: ");
+					INFO("Compass Data: X = %d , Y = %d, Z = %d", compData[0], compData[1], compData[2]);
+				}
+			}
 		}
 	}
 
 	if (chip & CHIP_TYPE_MS5611) {
 		if (gy->m_ms) {
-			retVal = ms5611_Update(gy->m_ms);
+			float pressure;
+			float temp;
+			retVal = readMsSensorData (handle, &pressure, &temp);
 			if (retVal) {
-				ERROR("Can not Update the MS Chip");
+				ERROR("Can not Read the MS Chip Sensors");
 				goto END;
+			} else {
+				INFO("Reading MS Chip Data: ");
+				INFO("Pressure = %f , Temperature = %f", pressure, temp);
 			}
-		} else {
-			ERROR("Can not Update the MS Chip, chip not initialized");
-			goto END;
 		}
 	}
 
@@ -644,24 +682,86 @@ static retcode readMpuSensorData ( gyHandle handle, float* accData, float* gyroD
 	if (retVal) {
 		ERROR("Failed to read Accelerometer Sensor Data");
 	} else {
-		INFO("Received Acc Sensor Data X = %d, Y= %d, Z=%d", accData[0], accData[1], data[2]);
+		INFO("Received Acc Sensor Data X = %f, Y= %f, Z=%f", accData[0], accData[1], accData[2]);
 	}
 
 	retVal = mpu60x0_GetGyroData(gy->m_mpu, &gyroData[0], &gyroData[1], &gyroData[2]);
 	if (retVal) {
 		ERROR("Failed to read the Gyroscope Sensor Data");
 	} else {
-		INFO("Received Gyro Sensor Data X = %d, Y= %d, Z=%d", gyroData[0], gyroData[1], gyroData[2]);
+		INFO("Received Gyro Sensor Data X = %f, Y= %f, Z=%f", gyroData[0], gyroData[1], gyroData[2]);
 	}
 
 	retVal = mpu60x0_GetTempData (gy->m_mpu, &tempData[0]);
 	if (retVal) {
 		ERROR("Failed to read the Temperature Sensor Data");
 	} else {
-		INFO("Received Temperature Sensor Data Temp = %d", tempData[0]);
+		INFO("Received Temperature Sensor Data Temp = %f", tempData[0]);
 	}
 
-//END:
+END:
+	EXIT();
+	return retVal;
+}
+
+
+static retcode readMsSensorData ( gyHandle handle, float* ptrPressure, float* ptrTemp) {
+	ENTER();
+
+	retcode retVal = 0;
+	Gy86 *gy = (Gy86 *)handle;
+	uint32 rawTemp;
+	uint32 rawPressure;
+	float pressure, temp;
+
+
+	//First Perform a temperature measurement
+	retVal = ms5611_ReadSensorData (gy->m_ms, SENSOR_TYPE_TEMP);
+	if (retVal) {
+		ERROR("Can not trigger a Temperature measurement in the MS5611 chip");
+		goto END;
+	}
+
+	//Wait for some time
+	usleep(100000);
+
+	retVal = ms5611_GetSensorData (gy->m_ms, &rawTemp);
+	if (retVal) {
+		ERROR("Can not read the Raw Temperature Value");
+		goto END;
+	} else {
+		INFO("Raw Temperature value = %d", rawTemp);
+	}
+
+
+	//Next Perform a Pressure measurement
+	retVal = ms5611_ReadSensorData (gy->m_ms, SENSOR_TYPE_PRESSURE);
+	if (retVal) {
+		ERROR("Can not trigger a Pressure measurement in the MS5611 chip");
+		goto END;
+	}
+
+	//Wait for some time
+	usleep(100000);
+
+	retVal = ms5611_GetSensorData (gy->m_ms, &rawPressure);
+	if (retVal) {
+		ERROR("Can not read the Raw Pressure Value");
+		goto END;
+	} else {
+		INFO("Raw Pressure value = %d", rawPressure);
+	}
+
+	//Now perform the calculations
+	retVal = ms5611_PerformCalculation (gy->m_ms, rawPressure, rawTemp, &pressure, &temp);
+	if (retVal) {
+		ERROR("Can not Perform the calculations to get the pressure and temperature readings");
+		goto END;
+	} else {
+		INFO("MS Chip Measurements: Temp = %f , Pressure = %f", temp, pressure);
+	}
+
+END:
 	EXIT();
 	return retVal;
 }

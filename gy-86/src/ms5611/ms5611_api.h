@@ -105,7 +105,7 @@ retcode ms5611_ReadSensorData (msHandle, Ms5611_SensorType);
 /**
  * Get a reading
  */
-retcode ms5611_GetSensorData (msHandle, uint32);
+retcode ms5611_GetSensorData (msHandle, uint32 *);
 
 /**
  * Perform Calculation

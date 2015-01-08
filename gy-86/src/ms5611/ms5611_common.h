@@ -34,7 +34,7 @@ typedef enum {
 
 typedef enum {
 	SENSOR_TYPE_PRESSURE = 1,
-	SENSOR_TYPE_TEMP = 2,
+	SENSOR_TYPE_TEMP = 2
 } Ms5611_SensorType;
 
 #endif /* MS5611_COMMON_H_ */

@@ -8,3 +8,8 @@ gy-86/include/mpu60x0/*
 gy-86/include/ms5611/*
 gy-86/include/logger/*
 gy-g6/include/hmc5883/*
+
+gy-86/include/gy86/
+gy-86/include/hmc5883/
+gy-86/src/gy-cli/gy86-cli
+gy-86/src/gy-cli/log-file.txt
