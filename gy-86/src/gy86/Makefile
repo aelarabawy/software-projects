@@ -3,7 +3,9 @@
 ## Author: Ahmed ElArabawy
 ## Created on : 16 Nov. 2014
 #######################################
-include ../Makefile.inc
+
+include ../platform.inc
+include ../Makefile.inc.$(platform)
 
 CUR_DIR=.
 
