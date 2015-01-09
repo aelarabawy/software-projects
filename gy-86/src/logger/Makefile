@@ -4,10 +4,9 @@
 ## Created on : 16 Nov. 2014
 #######################################
 
-# ToolChain
-TOOL_CHAIN_DIR=/usr/bin
-CC=$(TOOL_CHAIN_DIR)/gcc -std=gnu99
-AR=$(TOOL_CHAIN_DIR)/ar
+include ../platform.inc
+include ../Makefile.inc.$(platform)
+
 CUR_DIR=.
 
 # Include Directory

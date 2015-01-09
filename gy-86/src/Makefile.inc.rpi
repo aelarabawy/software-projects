@@ -1,0 +1,10 @@
+#######################################
+## Makefile.inc
+## Author: Ahmed ElArabawy
+## Created on : 16 Nov. 2014
+#######################################
+# ToolChain
+TOOL_CHAIN_DIR=~/work/rpi/rpi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin
+CC=$(TOOL_CHAIN_DIR)/arm-linux-gnueabihf-gcc -std=gnu99
+AR=$(TOOL_CHAIN_DIR)/arm-linux-gnueabihf-gcc-ar
+
