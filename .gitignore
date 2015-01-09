@@ -4,6 +4,8 @@
 *.a
 *.log
 .cproject
+.project
+*~
 gy-86/include/mpu60x0/*
 gy-86/include/ms5611/*
 gy-86/include/logger/*
